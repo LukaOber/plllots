@@ -1,3 +1,5 @@
+pub(crate) mod utils;
+
 use bon::{Builder, builder};
 use svg::{
     Document,
