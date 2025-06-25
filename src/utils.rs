@@ -1,4 +1,4 @@
-fn get_scale_details(min_val: f64, max_val: f64) -> (f64, f64, f64) {
+pub(crate) fn get_scale_details(min_val: f64, max_val: f64) -> (f64, f64, f64) {
     // Minimal increment to avoid round extreme values to be on the edge of the chart
     let epsilon = (max_val - min_val) / 1e6;
     let max_val = if max_val < 0.0 {
@@ -43,7 +43,7 @@ fn get_scale_details(min_val: f64, max_val: f64) -> (f64, f64, f64) {
     (scale_min, scale_max, step)
 }
 
-fn calculate(data: &[f64]) -> (f64, f64, f64) {
+pub(crate) fn calculate(data: &[f64]) -> (f64, f64, f64) {
     // Dummy code to show a usage example.
     let minimum_value = data
         .iter()
