@@ -1,6 +1,8 @@
-{ ... }:
+{ pkgs, ... }:
 
 {
+  packages = with pkgs; [ cargo-nextest ];
+
   languages.rust.enable = true;
 
   git-hooks.hooks = {
