@@ -3,7 +3,7 @@ pub(crate) mod utils;
 use bon::{Builder, builder};
 use svg::{
     Document, Node,
-    node::element::{Path, Rectangle, SVG, Text, path::Data},
+    node::element::{Circle, Path, Rectangle, SVG, Text, path::Data},
 };
 use utils::calculate_axis_ticks;
 
@@ -43,7 +43,62 @@ impl Chart {
                     .set("fill", "none"),
             );
 
+        self.x_axis.append_svg(&mut doc, &mut helper);
         self.y_axis.append_svg(&mut doc, &mut helper);
+
+        match (&self.x_axis.data, &self.y_axis.data) {
+            (AxisData::Category(x_items), AxisData::Category(y_items)) => todo!(),
+            (AxisData::Category(x_items), AxisData::Values(y_items)) => {
+                let mut path = String::new();
+                let mut symbols = Vec::new();
+                for (index, (x_item, y_item)) in x_items.iter().zip(y_items).enumerate() {
+                    let y_pos = if let AxisHelper::Values(y_axis_helper) =
+                        &helper.y_axis.as_ref().unwrap()
+                    {
+                        let percentage_height = (y_item / y_axis_helper.max);
+                        helper.offsets.y_axis_end - (percentage_height * helper.offsets.y_span)
+                    } else {
+                        unreachable!()
+                    };
+
+                    let x_spacing = helper.offsets.x_span / x_items.len() as f64;
+                    let x_pos = helper.offsets.x_axis_start + (index as f64 + 0.5) * x_spacing;
+
+                    symbols.push(
+                        Circle::new()
+                            .set("r", 2)
+                            .set("fill", "#ffffff")
+                            .set("stroke", "#5470c6")
+                            .set("stroke-width", 2)
+                            .set("cx", x_pos)
+                            .set("cy", y_pos),
+                    );
+
+                    if index == 0 {
+                        path.push_str(&format!("M{x_pos} {y_pos}"));
+                    } else {
+                        path.push_str(&format!("L{x_pos} {y_pos}"));
+                    }
+                }
+
+                doc.append(svg::node::Comment::new("Data line"));
+                doc.append(
+                    Path::new()
+                        .set("d", path)
+                        .set("fill", "transparent")
+                        .set("stroke", "#5470c6")
+                        .set("stroke-width", 2)
+                        .set("linejoin", "bevel"),
+                );
+
+                doc.append(svg::node::Comment::new("Data symbols"));
+                for symbol in symbols {
+                    doc.append(symbol);
+                }
+            }
+            (AxisData::Values(x_items), AxisData::Category(y_items)) => todo!(),
+            (AxisData::Values(x_items), AxisData::Values(y_items)) => todo!(),
+        }
 
         doc
     }
@@ -166,22 +221,20 @@ struct AxisCategoryHelper {
 struct AxisValuesHelper {
     min: f64,
     max: f64,
-    step: f64,
+    step_size: f64,
 }
 
 impl AppendSvg for YAxis {
     fn append_svg(&self, doc: &mut svg::Document, helper: &mut ChartPlotHelper) {
-        doc.append(svg::node::Comment::new("YAxis"));
         match &self.data {
             AxisData::Category(items) => todo!(),
             AxisData::Values(items) => {
                 let (min, max, step_size) = calculate_axis_ticks(&items);
                 let sub_tick_spacing = helper.offsets.y_span / (max / step_size);
-                for sub_tick_index in 0..((max / step_size) as i32 + 1) {
+                doc.append(svg::node::Comment::new("YAxis: Subticks"));
+                for sub_tick_index in 1..((max / step_size) as i32 + 1) {
                     let sub_tick_height =
                         helper.offsets.y_axis_end - (sub_tick_index as f64 * sub_tick_spacing);
-                    println!("{}", sub_tick_index as f64 * sub_tick_spacing);
-                    println!("{:?}", helper);
                     doc.append(
                         Path::new().set("stroke", "#E0E6F1").set(
                             "d",
@@ -190,6 +243,12 @@ impl AppendSvg for YAxis {
                                 .line_to((helper.offsets.x_axis_end, sub_tick_height)),
                         ),
                     );
+                }
+
+                doc.append(svg::node::Comment::new("YAxis: Labels"));
+                for sub_tick_index in 0..((max / step_size) as i32 + 1) {
+                    let sub_tick_height =
+                        helper.offsets.y_axis_end - (sub_tick_index as f64 * sub_tick_spacing);
                     doc.append(
                         Text::new(format!("{}", min + step_size * sub_tick_index as f64))
                             .set("dominant-baseline", "central")
@@ -206,6 +265,12 @@ impl AppendSvg for YAxis {
                             ),
                     );
                 }
+
+                helper.y_axis = Some(AxisHelper::Values(AxisValuesHelper {
+                    min,
+                    max,
+                    step_size,
+                }))
             }
         }
     }
@@ -213,9 +278,55 @@ impl AppendSvg for YAxis {
 
 impl AppendSvg for XAxis {
     fn append_svg(&self, doc: &mut svg::Document, helper: &mut ChartPlotHelper) {
-        doc.append(svg::node::Comment::new("XAxis"));
         match &self.data {
-            AxisData::Category(items) => todo!(),
+            AxisData::Category(items) => {
+                doc.append(svg::node::Comment::new("XAxis"));
+                doc.append(
+                    Path::new()
+                        .set("stroke", "#6E7079")
+                        .set("stroke-linecap", "square")
+                        .set(
+                            "d",
+                            Data::new()
+                                .move_to((helper.offsets.x_axis_start, helper.offsets.y_axis_end))
+                                .line_to((helper.offsets.x_axis_end, helper.offsets.y_axis_end)),
+                        ),
+                );
+
+                let label_spacing = helper.offsets.x_span / items.len() as f64;
+                doc.append(svg::node::Comment::new("XAxis: Subticks"));
+                for label_index in 0..=items.len() {
+                    let x_pos = helper.offsets.x_axis_start + label_index as f64 * label_spacing;
+                    let y_pos = helper.offsets.y_axis_end + 5.0;
+                    doc.append(
+                        Path::new().set("stroke", "#6E7079").set(
+                            "d",
+                            Data::new()
+                                .move_to((x_pos, helper.offsets.y_axis_end))
+                                .line_to((x_pos, y_pos)),
+                        ),
+                    );
+                }
+
+                doc.append(svg::node::Comment::new("XAxis: Labels"));
+                for (label_index, label) in items.iter().enumerate() {
+                    let x_pos =
+                        helper.offsets.x_axis_start + (label_index as f64 + 0.5) * label_spacing;
+                    let y_pos = helper.offsets.y_axis_end + 14.0;
+                    doc.append(
+                        Text::new(format!("{label}"))
+                            .set("dominant-baseline", "central")
+                            .set("text-anchor", "middle")
+                            .set("style", "font-size:12px;font-family:sans-serif")
+                            .set("fill", "#6E7079")
+                            .set("transform", format!("translate({} {})", x_pos, y_pos)),
+                    );
+                }
+
+                helper.x_axis = Some(AxisHelper::Category(AxisCategoryHelper {
+                    amount: items.len(),
+                }))
+            }
             AxisData::Values(items) => todo!(),
         }
     }
@@ -229,10 +340,13 @@ enum AxisData {
 
 #[cfg(test)]
 mod tests {
+    use std::time::Instant;
+
     use super::*;
 
     #[test]
     fn it_works() {
+        let instant = Instant::now();
         let chart = Chart::builder()
             .size(PlotSize {
                 width: 1000.0,
@@ -241,7 +355,7 @@ mod tests {
             .x_axis(
                 XAxis::builder()
                     .data(AxisData::Category(bon::vec![
-                        "Mon", "Tue", "Wed", "Thu", "Fri", "Sut", "Sun"
+                        "Mon", "Tue", "Wed", "Thu", "Fri", "Sut", "Sun",
                     ]))
                     .build(),
             )
@@ -255,9 +369,8 @@ mod tests {
             .build();
 
         let document = chart.to_svg();
+        println!("{:?}", instant.elapsed());
         svg::save("line.svg", &document).unwrap();
-        println!("{:#?}", document);
-        println!("{:#?}", chart);
         assert!(false);
     }
 }
