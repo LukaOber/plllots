@@ -1,4 +1,4 @@
-pub(crate) fn get_scale_details(min_val: f64, max_val: f64) -> (f64, f64, f64) {
+fn get_scale_details(min_val: f64, max_val: f64) -> (f64, f64, f64) {
     // Minimal increment to avoid round extreme values to be on the edge of the chart
     let epsilon = (max_val - min_val) / 1e6;
     let max_val = if max_val < 0.0 {
@@ -31,11 +31,6 @@ pub(crate) fn get_scale_details(min_val: f64, max_val: f64) -> (f64, f64, f64) {
         .unwrap();
     let step = good_normalized_step / step_power;
 
-    println!(
-        "{:?}, {:?}, {:?}, {:?}",
-        step, good_normalized_step, step_power, max_val
-    );
-
     // Determine the scale limits based on the chosen step.
     let scale_max = (max_val / step).ceil() * step;
     let scale_min = (min_val / step).floor() * step;
@@ -43,7 +38,7 @@ pub(crate) fn get_scale_details(min_val: f64, max_val: f64) -> (f64, f64, f64) {
     (scale_min, scale_max, step)
 }
 
-pub(crate) fn calculate(data: &[f64]) -> (f64, f64, f64) {
+pub(crate) fn calculate_axis_ticks(data: &[f64]) -> (f64, f64, f64) {
     // Dummy code to show a usage example.
     let minimum_value = data
         .iter()
@@ -67,7 +62,7 @@ mod tests {
     #[test]
     fn basic() {
         let data = [150.0, 230.0, 224.0, 218.0, 135.0, 147.0, 260.0];
-        let (min, max, step) = calculate(&data);
+        let (min, max, step) = calculate_axis_ticks(&data);
         assert_eq!(min, 0.0);
         assert_eq!(max, 300.0);
         assert_eq!(step, 50.0);
@@ -76,7 +71,7 @@ mod tests {
     #[test]
     fn basic2() {
         let data = [820.0, 932.0, 901.0, 934.0, 1290.0, 1330.0, 1320.0];
-        let (min, max, step) = calculate(&data);
+        let (min, max, step) = calculate_axis_ticks(&data);
         assert_eq!(min, 0.0);
         assert_eq!(max, 1500.0);
         assert_eq!(step, 300.0);
@@ -87,7 +82,7 @@ mod tests {
         let data = [
             200.0, 560.0, 750.0, 580.0, 250.0, 300.0, 450.0, 300.0, 100.0,
         ];
-        let (min, max, step) = calculate(&data);
+        let (min, max, step) = calculate_axis_ticks(&data);
         assert_eq!(min, 0.0);
         assert_eq!(max, 900.0);
         assert_eq!(step, 150.0);
@@ -96,7 +91,7 @@ mod tests {
     #[test]
     fn basic4() {
         let data = [0.0150, 0.0230, 0.0224, 0.0218, 0.0135, 0.0147, 0.0260];
-        let (min, max, step) = calculate(&data);
+        let (min, max, step) = calculate_axis_ticks(&data);
         assert_eq!(min, 0.0);
         assert_eq!(max, 0.03);
         assert_eq!(step, 0.005);
@@ -105,7 +100,7 @@ mod tests {
     #[test]
     fn neg_basic() {
         let data = [-150.0, -230.0, -224.0, -218.0, -135.0, -147.0, -260.0];
-        let (min, max, step) = calculate(&data);
+        let (min, max, step) = calculate_axis_ticks(&data);
         assert_eq!(min, -300.0);
         assert_eq!(max, 0.0);
         assert_eq!(step, 50.0);
