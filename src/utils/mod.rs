@@ -1,3 +1,5 @@
+//! Utility functions for chart calculations and scaling.
+
 fn get_scale_details(min_val: f64, max_val: f64) -> (f64, f64, f64) {
     // Minimal increment to avoid round extreme values to be on the edge of the chart
     let epsilon = (max_val - min_val) / 1e6;
@@ -38,7 +40,7 @@ fn get_scale_details(min_val: f64, max_val: f64) -> (f64, f64, f64) {
     (scale_min, scale_max, step)
 }
 
-pub(crate) fn calculate_axis_ticks(data: &[f64]) -> (f64, f64, f64) {
+pub fn calculate_axis_ticks(data: &[f64]) -> (f64, f64, f64) {
     // Dummy code to show a usage example.
     let minimum_value = data
         .iter()
