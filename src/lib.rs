@@ -44,6 +44,7 @@ pub mod series;
 pub mod utils;
 
 // Re-export commonly used items for convenience
+pub use bon;
 pub use chart::{Chart, ChartPlotHelper};
 pub use component::{AppendSvg, AxisData, XAxis, YAxis};
 pub use element::{MarginType, Margins, Offsets, PlotSize};
