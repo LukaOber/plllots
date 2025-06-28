@@ -46,5 +46,5 @@ pub struct Text<'a> {
     pub fill_color: &'a Brush,
     pub font_size: f64,
     pub text_anchor: Alignment,
-    pub translation: Point,
+    pub coord: Point,
 }

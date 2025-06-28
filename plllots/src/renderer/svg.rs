@@ -140,7 +140,7 @@ impl<'a> AppendSvg for crate::primitives::Text<'a> {
                 .set("fill", fill_color)
                 .set(
                     "transform",
-                    format!("translate({} {})", self.translation.x, self.translation.y),
+                    format!("translate({} {})", self.coord.x, self.coord.y),
                 ),
         );
     }

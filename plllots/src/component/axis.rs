@@ -96,24 +96,9 @@ impl<'a> AppendPrimitives<'a> for YAxis {
                         fill_color: &self.label_color,
                         font_size: 12.0,
                         text_anchor: parley::Alignment::End,
-                        translation: Point::new(helper.offsets.x_axis_start - 8.0, sub_tick_height),
+                        coord: Point::new(helper.offsets.x_axis_start - 8.0, sub_tick_height),
                     };
                     primitives.push(crate::primitives::Primitives::Text(text));
-                    // doc.append(
-                    //     Text::new(format!("{}", min + step_size * sub_tick_index as f64))
-                    //         .set("dominant-baseline", "central")
-                    //         .set("text-anchor", "end")
-                    //         .set("style", "font-size:12px;font-family:sans-serif")
-                    //         .set("fill", "#6E7079")
-                    //         .set(
-                    //             "transform",
-                    //             format!(
-                    //                 "translate({} {})",
-                    //                 helper.offsets.x_axis_start - 8.0,
-                    //                 sub_tick_height
-                    //             ),
-                    //         ),
-                    // );
                 }
 
                 helper.y_axis = Some(AxisHelper::Values(AxisValuesHelper {
@@ -164,14 +149,14 @@ impl<'a> AppendPrimitives<'a> for XAxis {
                     let x_pos =
                         helper.offsets.x_axis_start + (label_index as f64 + 0.5) * label_spacing;
                     let y_pos = helper.offsets.y_axis_end + 14.0;
-                    // doc.append(
-                    //     Text::new(format!("{label}"))
-                    //         .set("dominant-baseline", "central")
-                    //         .set("text-anchor", "middle")
-                    //         .set("style", "font-size:12px;font-family:sans-serif")
-                    //         .set("fill", "#6E7079")
-                    //         .set("transform", format!("translate({} {})", x_pos, y_pos)),
-                    // );
+                    let text = crate::primitives::Text {
+                        text: label.to_string(),
+                        fill_color: &self.label_color,
+                        font_size: 12.0,
+                        text_anchor: parley::Alignment::Middle,
+                        coord: Point::new(x_pos, y_pos),
+                    };
+                    primitives.push(crate::primitives::Primitives::Text(text));
                 }
 
                 helper.x_axis = Some(AxisHelper::Category(AxisCategoryHelper {

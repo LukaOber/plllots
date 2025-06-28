@@ -35,7 +35,6 @@ impl RenderSeries for LineSeries {
             (AxisData::Category(x_items), AxisData::Values(y_items)) => {
                 let mut path = String::new();
                 let mut symbols = Vec::new();
-                println!("{:#?}", &helper);
 
                 for (index, (_x_item, y_item)) in x_items.iter().zip(y_items).enumerate() {
                     let y_pos = if let AxisHelper::Values(y_axis_helper) =
@@ -119,8 +118,6 @@ impl LineSeries {
                         path.line_to(point);
                     }
                 }
-
-                println!("{:#?}", &points);
 
                 // Draw the line
                 scene.stroke(
