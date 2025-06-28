@@ -30,15 +30,10 @@ impl SvgRenderer {
 
         // Render axes
         let primitives = chart.generate_primitives();
-        let helper = chart.create_plot_helper();
         for primitive in primitives {
             // println!("{:#?}", primitive);
             primitive.append_svg(&mut doc);
         }
-
-        // // Render series data
-        // let line_series = LineSeries;
-        // line_series.render_to_svg(&mut doc, &helper, &chart.x_axis.data, &chart.y_axis.data);
         doc
     }
 
@@ -68,8 +63,8 @@ impl AppendSvg for crate::primitives::Line<'_> {
                     colors[0], colors[1], colors[2], colors[3]
                 )
             }
-            Brush::Gradient(gradient) => todo!(),
-            Brush::Image(image) => todo!(),
+            Brush::Gradient(_gradient) => todo!(),
+            Brush::Image(_image) => todo!(),
         };
         doc.append(
             Path::new()
@@ -95,8 +90,8 @@ impl AppendSvg for crate::primitives::Text<'_> {
                     colors[0], colors[1], colors[2], colors[3]
                 )
             }
-            Brush::Gradient(gradient) => todo!(),
-            Brush::Image(image) => todo!(),
+            Brush::Gradient(_gradient) => todo!(),
+            Brush::Image(_image) => todo!(),
         };
 
         let text_anchor = match self.text_anchor {
@@ -134,8 +129,8 @@ impl AppendSvg for crate::primitives::Path<'_> {
                     colors[0], colors[1], colors[2], colors[3]
                 )
             }
-            Brush::Gradient(gradient) => todo!(),
-            Brush::Image(image) => todo!(),
+            Brush::Gradient(_gradient) => todo!(),
+            Brush::Image(_image) => todo!(),
         };
 
         let mut path = Data::new();

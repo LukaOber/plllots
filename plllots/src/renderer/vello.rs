@@ -34,62 +34,9 @@ impl VelloRenderer {
         );
 
         let primitives = chart.generate_primitives();
-        let helper = chart.create_plot_helper();
-        // match &chart.x_axis.data {
-        //     CartesianAxis::Category(items) => {
-        //         helper.x_axis = Some(AxisHelper::Category(crate::component::AxisCategoryHelper {
-        //             amount: items.len(),
-        //         }));
-        //     }
-        //     CartesianAxis::Values(_) => todo!("Values X-axis not implemented yet"),
-        // }
-
-        // match &chart.y_axis.data {
-        //     CartesianAxis::Values(items) => {
-        //         let (min, max, step_size) = crate::utils::calculate_axis_ticks(&items);
-        //         helper.y_axis = Some(AxisHelper::Values(crate::component::AxisValuesHelper {
-        //             min,
-        //             max,
-        //             step_size,
-        //         }));
-        //     }
-        //     CartesianAxis::Category(_) => todo!("Category Y-axis not implemented yet"),
-        // }
-
         for primitive in primitives {
             primitive.append_vello(scene, self);
         }
-        // println!("{:#?}", primitives);
-        // match &chart.x_axis.data {
-        //     CartesianAxis::Category(items) => {
-        //         helper.x_axis = Some(AxisHelper::Category(crate::component::AxisCategoryHelper {
-        //             amount: items.len(),
-        //         }));
-        //     }
-        //     CartesianAxis::Values(_) => todo!("Values X-axis not implemented yet"),
-        // }
-
-        // match &chart.y_axis.data {
-        //     CartesianAxis::Values(items) => {
-        //         let (min, max, step_size) = crate::utils::calculate_axis_ticks(&items);
-        //         helper.y_axis = Some(AxisHelper::Values(crate::component::AxisValuesHelper {
-        //             min,
-        //             max,
-        //             step_size,
-        //         }));
-        //     }
-        //     CartesianAxis::Category(_) => todo!("Category Y-axis not implemented yet"),
-        // }
-
-        // // Render series data
-        // let line_series = LineSeries;
-        // line_series.render_line_series(scene, &helper, &chart.x_axis.data, &chart.y_axis.data);
-        // // Render axes
-        // self.render_x_axis(scene, &helper, &chart.x_axis.data);
-        // self.render_y_axis(scene, &helper, &chart.y_axis.data);
-
-        // // Render line series
-        // self.render_line_series(scene, &helper, &chart.x_axis.data, &chart.y_axis.data);
     }
 }
 
@@ -98,7 +45,7 @@ pub trait AppendVello {
 }
 
 impl AppendVello for crate::primitives::Line<'_> {
-    fn append_vello(&self, scene: &mut Scene, vello_render: &mut VelloRenderer) {
+    fn append_vello(&self, scene: &mut Scene, _vello_render: &mut VelloRenderer) {
         scene.stroke(
             self.stroke,
             Affine::IDENTITY,

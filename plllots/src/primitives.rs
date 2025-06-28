@@ -39,7 +39,7 @@ pub trait AppendPrimitives<'a> {
     fn append_primitives(
         &'a self,
         primitives: &mut Vec<Primitives<'a>>,
-        helper: &mut crate::chart::ChartPlotHelper,
+        helper: &mut crate::chart::ChartHelper,
     );
 }
 

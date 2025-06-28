@@ -1,7 +1,11 @@
 use bon::Builder;
 use kurbo::Point;
 
-use crate::{XAxis, YAxis, primitives::AppendPrimitives, utils::calculate_axis_ticks};
+use crate::{
+    component::{CartesianAxis, XAxis, YAxis},
+    primitives::AppendPrimitives,
+    utils::calculate_axis_ticks,
+};
 
 #[derive(Debug, Builder, Clone)]
 pub struct Cartesian {
@@ -14,16 +18,13 @@ impl<'a> AppendPrimitives<'a> for Cartesian {
     fn append_primitives(
         &'a self,
         primitives: &mut Vec<crate::primitives::Primitives<'a>>,
-        helper: &mut crate::chart::ChartPlotHelper,
+        helper: &mut crate::chart::ChartHelper,
     ) {
         match (&self.x_axis.cartesian_axis, &self.y_axis.cartesian_axis) {
-            (
-                crate::CartesianAxis::Category(_x_items),
-                crate::CartesianAxis::Category(_y_items),
-            ) => {
+            (CartesianAxis::Category(_x_items), CartesianAxis::Category(_y_items)) => {
                 todo!()
             }
-            (crate::CartesianAxis::Category(x_items), crate::CartesianAxis::Values) => {
+            (CartesianAxis::Category(x_items), CartesianAxis::Values) => {
                 // X-Axis
                 let line = crate::primitives::Line {
                     stroke: &self.x_axis.stroke,
@@ -116,14 +117,12 @@ impl<'a> AppendPrimitives<'a> for Cartesian {
                 }
                 primitives.push(crate::primitives::Primitives::Path(path));
             }
-            (crate::CartesianAxis::Values, crate::CartesianAxis::Category(_y_items)) => {
+            (CartesianAxis::Values, CartesianAxis::Category(_y_items)) => {
                 todo!()
             }
-            (crate::CartesianAxis::Values, crate::CartesianAxis::Values) => {
+            (CartesianAxis::Values, CartesianAxis::Values) => {
                 todo!()
             }
         }
-        // self.x_axis.append_primitives(primitives, helper);
-        // self.y_axis.append_primitives(primitives, helper);
     }
 }

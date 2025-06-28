@@ -1,10 +1,9 @@
-use super::ChartPlotHelper;
+use super::ChartHelper;
 use crate::coordinate_system::CoordinateSystem;
 use crate::element::{Margins, Offsets, PlotSize};
 use crate::primitives::{AppendPrimitives, Primitives};
 use bon::Builder;
 
-/// Main chart structure with builder pattern support.
 #[derive(Debug, Clone, Builder)]
 pub struct Chart {
     pub size: PlotSize,
@@ -14,13 +13,11 @@ pub struct Chart {
 }
 
 impl Chart {
-    pub(crate) fn create_plot_helper(&self) -> ChartPlotHelper {
-        ChartPlotHelper {
+    pub(crate) fn create_plot_helper(&self) -> ChartHelper {
+        ChartHelper {
             plot_size: self.size,
             margins: self.margins,
             offsets: Offsets::from_margin(&self.size, &self.margins),
-            y_axis: None,
-            x_axis: None,
         }
     }
 

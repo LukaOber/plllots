@@ -1,5 +1,3 @@
-//! Basic chart elements and primitives.
-
 pub mod margin;
 pub mod size;
 

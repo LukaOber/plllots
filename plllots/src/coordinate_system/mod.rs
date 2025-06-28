@@ -13,7 +13,7 @@ impl<'a> AppendPrimitives<'a> for CoordinateSystem {
     fn append_primitives(
         &'a self,
         primitives: &mut Vec<crate::primitives::Primitives<'a>>,
-        helper: &mut crate::chart::ChartPlotHelper,
+        helper: &mut crate::chart::ChartHelper,
     ) {
         match self {
             CoordinateSystem::Cartesian(cartesian) => {

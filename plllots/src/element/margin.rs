@@ -1,25 +1,17 @@
 use super::size::PlotSize;
 use bon::Builder;
 
-/// Represents different types of margins that can be applied to a chart.
 #[derive(Debug, Clone, Copy)]
 pub enum MarginType {
-    /// Margin specified in pixels
     Pixel(f64),
-    /// Margin specified as a percentage of the chart dimension
     Percentage(f64),
 }
 
-/// Represents the margins around a chart.
 #[derive(Debug, Builder, Clone, Copy)]
 pub struct Margins {
-    /// Left margin
     pub left: MarginType,
-    /// Top margin
     pub top: MarginType,
-    /// Right margin
     pub right: MarginType,
-    /// Bottom margin
     pub bottom: MarginType,
 }
 
@@ -34,7 +26,6 @@ impl Default for Margins {
     }
 }
 
-/// Calculated offset values for positioning chart elements.
 #[derive(Debug, Clone)]
 pub struct Offsets {
     pub x_axis_start: f64,
@@ -46,7 +37,6 @@ pub struct Offsets {
 }
 
 impl Offsets {
-    /// Calculate offsets from plot size and margins.
     pub fn from_margin(plot_size: &PlotSize, margins: &Margins) -> Offsets {
         let x_axis_start = match margins.left {
             MarginType::Pixel(pixel) => pixel,
