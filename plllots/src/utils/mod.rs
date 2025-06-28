@@ -22,7 +22,7 @@ fn get_scale_details(min_val: f64, max_val: f64) -> (f64, f64, f64) {
     let rough_step = range_val / (step_count as f64 - 1.0);
 
     // Set best step for the range
-    let good_normalized_steps = vec![1.0, 1.5, 2.0, 3.0, 5.0, 7.5, 10.0]; // keep the 10 at the end
+    let good_normalized_steps = [1.0, 1.5, 2.0, 3.0, 5.0, 7.5, 10.0]; // keep the 10 at the end
 
     // Normalize rough step to find the normalized one that fits best
     let step_power = 10f64.powf(-rough_step.abs().log10().floor());
@@ -50,8 +50,8 @@ pub fn calculate_axis_ticks(data: &[f64]) -> (f64, f64, f64) {
         .iter()
         .max_by(|a, b| a.partial_cmp(b).unwrap())
         .unwrap();
-    let results = get_scale_details(*minimum_value, *maximum_value);
-    results
+
+    get_scale_details(*minimum_value, *maximum_value)
     // chart.YAxis.MinValue = results.0;
     // chart.YAxis.MaxValue = results.1;
     // chart.YAxis.Step = results.2;

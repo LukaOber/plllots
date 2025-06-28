@@ -1,5 +1,3 @@
-use std::fmt::Display;
-
 use kurbo::{Point, Stroke};
 use parley::Alignment;
 use peniko::Brush;
@@ -13,7 +11,7 @@ pub enum Primitives<'a> {
     Path(Path<'a>),
 }
 
-impl<'a> AppendSvg for Primitives<'a> {
+impl AppendSvg for Primitives<'_> {
     fn append_svg(&self, doc: &mut svg::Document) {
         match self {
             Primitives::Line(line) => line.append_svg(doc),
@@ -23,7 +21,7 @@ impl<'a> AppendSvg for Primitives<'a> {
     }
 }
 
-impl<'a> AppendVello for Primitives<'a> {
+impl AppendVello for Primitives<'_> {
     fn append_vello(
         &self,
         scene: &mut vello::Scene,
@@ -32,7 +30,7 @@ impl<'a> AppendVello for Primitives<'a> {
         match self {
             Primitives::Line(line) => line.append_vello(scene, vello_render),
             Primitives::Text(text) => text.append_vello(scene, vello_render),
-            Primitives::Path(path) => todo!(),
+            Primitives::Path(path) => path.append_vello(scene, vello_render),
         }
     }
 }

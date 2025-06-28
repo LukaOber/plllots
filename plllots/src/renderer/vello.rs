@@ -1,18 +1,19 @@
-use crate::RenderSeries;
-use crate::chart::{Chart, ChartPlotHelper};
-use crate::component::{AxisHelper, CartesianAxis};
-use kurbo::{Affine, BezPath, Circle, Line, PathEl, Point, Rect, Size, Stroke};
+use crate::chart::Chart;
+use kurbo::{Affine, BezPath, Line, Rect, Stroke};
 use parley::{Alignment, AlignmentOptions};
-use parley::{
-    FontContext, Layout, LayoutContext, PositionedLayoutItem,
-    style::{FontFamily, FontStack, FontStyle, FontWeight, StyleProperty},
-};
+use parley::{FontContext, LayoutContext, PositionedLayoutItem, style::StyleProperty};
 use peniko::{Brush, Color, Fill};
-use vello::{AaConfig, RenderParams, Renderer, Scene};
+use vello::Scene;
 
 pub struct VelloRenderer {
     font_cx: FontContext,
     layout_cx: LayoutContext,
+}
+
+impl Default for VelloRenderer {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl VelloRenderer {
@@ -33,7 +34,7 @@ impl VelloRenderer {
         );
 
         let primitives = chart.generate_primitives();
-        let mut helper = chart.create_plot_helper();
+        let helper = chart.create_plot_helper();
         // match &chart.x_axis.data {
         //     CartesianAxis::Category(items) => {
         //         helper.x_axis = Some(AxisHelper::Category(crate::component::AxisCategoryHelper {
@@ -96,7 +97,7 @@ pub trait AppendVello {
     fn append_vello(&self, scene: &mut Scene, vello_render: &mut VelloRenderer);
 }
 
-impl<'a> AppendVello for crate::primitives::Line<'a> {
+impl AppendVello for crate::primitives::Line<'_> {
     fn append_vello(&self, scene: &mut Scene, vello_render: &mut VelloRenderer) {
         scene.stroke(
             self.stroke,
@@ -108,7 +109,7 @@ impl<'a> AppendVello for crate::primitives::Line<'a> {
     }
 }
 
-impl<'a> AppendVello for crate::primitives::Text<'a> {
+impl AppendVello for crate::primitives::Text<'_> {
     fn append_vello(&self, scene: &mut Scene, vello_render: &mut VelloRenderer) {
         let mut layout_builder =
             vello_render
@@ -179,5 +180,27 @@ impl<'a> AppendVello for crate::primitives::Text<'a> {
                 }
             }
         }
+    }
+}
+
+impl AppendVello for crate::primitives::Path<'_> {
+    fn append_vello(&self, scene: &mut Scene, _vello_render: &mut VelloRenderer) {
+        let mut path = BezPath::new();
+
+        for (index, point) in self.coords.iter().enumerate() {
+            if index == 0 {
+                path.move_to(*point);
+            } else {
+                path.line_to(*point);
+            }
+        }
+
+        scene.stroke(
+            &Stroke::new(2.0),
+            Affine::IDENTITY,
+            &Brush::Solid(Color::from_rgb8(84, 112, 198)),
+            None,
+            &path,
+        );
     }
 }

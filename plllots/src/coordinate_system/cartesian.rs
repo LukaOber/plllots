@@ -1,6 +1,5 @@
 use bon::Builder;
-use kurbo::{Point, Stroke};
-use peniko::{Brush, Color};
+use kurbo::Point;
 
 use crate::{XAxis, YAxis, primitives::AppendPrimitives, utils::calculate_axis_ticks};
 
@@ -18,7 +17,10 @@ impl<'a> AppendPrimitives<'a> for Cartesian {
         helper: &mut crate::chart::ChartPlotHelper,
     ) {
         match (&self.x_axis.cartesian_axis, &self.y_axis.cartesian_axis) {
-            (crate::CartesianAxis::Category(x_items), crate::CartesianAxis::Category(y_items)) => {
+            (
+                crate::CartesianAxis::Category(_x_items),
+                crate::CartesianAxis::Category(_y_items),
+            ) => {
                 todo!()
             }
             (crate::CartesianAxis::Category(x_items), crate::CartesianAxis::Values) => {
@@ -114,7 +116,7 @@ impl<'a> AppendPrimitives<'a> for Cartesian {
                 }
                 primitives.push(crate::primitives::Primitives::Path(path));
             }
-            (crate::CartesianAxis::Values, crate::CartesianAxis::Category(y_items)) => {
+            (crate::CartesianAxis::Values, crate::CartesianAxis::Category(_y_items)) => {
                 todo!()
             }
             (crate::CartesianAxis::Values, crate::CartesianAxis::Values) => {

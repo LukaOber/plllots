@@ -1,4 +1,3 @@
-use kurbo::BezPath;
 use parley::Alignment;
 use peniko::Brush;
 use svg::node::element::path::Data;
@@ -6,9 +5,6 @@ use svg::node::element::{Path, Rectangle};
 use svg::{Document, Node};
 
 use crate::chart::Chart;
-use crate::component::AxisHelper;
-use crate::primitives::AppendPrimitives;
-use crate::{CartesianAxis, RenderSeries};
 use std::io::Result;
 
 pub struct SvgRenderer;
@@ -34,7 +30,7 @@ impl SvgRenderer {
 
         // Render axes
         let primitives = chart.generate_primitives();
-        let mut helper = chart.create_plot_helper();
+        let helper = chart.create_plot_helper();
         for primitive in primitives {
             // println!("{:#?}", primitive);
             primitive.append_svg(&mut doc);
@@ -62,7 +58,7 @@ pub trait AppendSvg {
     fn append_svg(&self, doc: &mut Document);
 }
 
-impl<'a> AppendSvg for crate::primitives::Line<'a> {
+impl AppendSvg for crate::primitives::Line<'_> {
     fn append_svg(&self, doc: &mut svg::Document) {
         let stroke_color = match &self.stroke_color {
             Brush::Solid(alpha_color) => {
@@ -89,7 +85,7 @@ impl<'a> AppendSvg for crate::primitives::Line<'a> {
     }
 }
 
-impl<'a> AppendSvg for crate::primitives::Text<'a> {
+impl AppendSvg for crate::primitives::Text<'_> {
     fn append_svg(&self, doc: &mut svg::Document) {
         let fill_color = match &self.fill_color {
             Brush::Solid(alpha_color) => {
@@ -128,7 +124,7 @@ impl<'a> AppendSvg for crate::primitives::Text<'a> {
     }
 }
 
-impl<'a> AppendSvg for crate::primitives::Path<'a> {
+impl AppendSvg for crate::primitives::Path<'_> {
     fn append_svg(&self, doc: &mut svg::Document) {
         let stroke_color = match &self.stroke_color {
             Brush::Solid(alpha_color) => {

@@ -1,12 +1,8 @@
 use super::ChartPlotHelper;
-use crate::component::{XAxis, YAxis};
 use crate::coordinate_system::CoordinateSystem;
 use crate::element::{Margins, Offsets, PlotSize};
 use crate::primitives::{AppendPrimitives, Primitives};
-use crate::renderer::AppendSvg;
-use crate::series::RenderSeries;
 use bon::Builder;
-use svg::{Document, node::element::Rectangle};
 
 /// Main chart structure with builder pattern support.
 #[derive(Debug, Clone, Builder)]

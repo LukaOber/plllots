@@ -1,11 +1,6 @@
-use crate::{primitives::AppendPrimitives, utils::calculate_axis_ticks};
 use bon::Builder;
-use kurbo::{Point, Stroke};
+use kurbo::Stroke;
 use peniko::{Brush, Color};
-use svg::{
-    Document, Node,
-    node::element::{Path, Text, path::Data},
-};
 
 #[derive(Debug, Clone)]
 pub enum CartesianAxis {

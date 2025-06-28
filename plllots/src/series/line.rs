@@ -1,12 +1,6 @@
 use crate::chart::ChartPlotHelper;
-use crate::component::{AxisHelper, CartesianAxis};
-use kurbo::{Affine, BezPath, Point, Stroke};
-use peniko::{Brush, Color, Fill};
-use svg::{
-    Document, Node,
-    node::element::{Circle, Path},
-};
-use vello::Scene;
+use crate::component::CartesianAxis;
+use svg::Document;
 
 /// Trait for rendering series data to SVG.
 pub trait RenderSeries {
