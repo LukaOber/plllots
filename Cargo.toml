@@ -1,13 +1,3 @@
-[package]
-name = "plllots"
-version = "0.1.0"
-edition = "2024"
-
-[dependencies]
-bon = "3.6.4"
-num-traits = "0.2.19"
-svg = "0.18.0"
-vello = "0.5"
-kurbo = "0.11"
-parley = "0.3"
-peniko = "0.4"
+[workspace]
+resolver = "2"
+members = ["plllots"]
