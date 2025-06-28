@@ -1,11 +1,14 @@
-use svg::Document;
-use svg::node::element::Rectangle;
+use parley::Alignment;
+use peniko::Brush;
+use svg::node::element::path::Data;
+use svg::node::element::{Path, Rectangle};
+use svg::{Document, Node};
 
 use crate::chart::Chart;
+use crate::component::AxisHelper;
 use crate::primitives::AppendPrimitives;
-use crate::{LineSeries, RenderSeries};
+use crate::{AxisData, LineSeries, RenderSeries};
 use std::io::Result;
-use std::path::Path;
 
 pub struct SvgRenderer;
 
@@ -30,8 +33,28 @@ impl SvgRenderer {
 
         // Render axes
         let primitives = chart.generate_primitives();
-        let helper = chart.create_plot_helper();
+        let mut helper = chart.create_plot_helper();
 
+        match &chart.x_axis.data {
+            AxisData::Category(items) => {
+                helper.x_axis = Some(AxisHelper::Category(crate::component::AxisCategoryHelper {
+                    amount: items.len(),
+                }));
+            }
+            AxisData::Values(_) => todo!("Values X-axis not implemented yet"),
+        }
+
+        match &chart.y_axis.data {
+            AxisData::Values(items) => {
+                let (min, max, step_size) = crate::utils::calculate_axis_ticks(&items);
+                helper.y_axis = Some(AxisHelper::Values(crate::component::AxisValuesHelper {
+                    min,
+                    max,
+                    step_size,
+                }));
+            }
+            AxisData::Category(_) => todo!("Category Y-axis not implemented yet"),
+        }
         for primitive in primitives {
             primitive.append_svg(&mut doc);
         }
@@ -41,7 +64,7 @@ impl SvgRenderer {
         doc
     }
 
-    pub fn save<P: AsRef<Path>>(&self, chart: &Chart, path: P) -> Result<()> {
+    pub fn save<P: AsRef<std::path::Path>>(&self, chart: &Chart, path: P) -> Result<()> {
         let doc = self.render(chart);
         svg::save(path, &doc)
     }
@@ -55,4 +78,70 @@ impl Default for SvgRenderer {
 
 pub trait AppendSvg {
     fn append_svg(&self, doc: &mut Document);
+}
+
+impl<'a> AppendSvg for crate::primitives::Line<'a> {
+    fn append_svg(&self, doc: &mut svg::Document) {
+        let stroke_color = match &self.stroke_color {
+            Brush::Solid(alpha_color) => {
+                let colors = alpha_color.to_rgba8().to_u8_array();
+                format!(
+                    "#{:X}{:X}{:X}{:X}",
+                    colors[0], colors[1], colors[2], colors[3]
+                )
+            }
+            Brush::Gradient(gradient) => todo!(),
+            Brush::Image(image) => todo!(),
+        };
+        doc.append(
+            Path::new()
+                .set("stroke", stroke_color)
+                .set("stroke-width", self.stroke.width)
+                .set(
+                    "d",
+                    Data::new()
+                        .move_to((self.coords.0.x, self.coords.0.y))
+                        .line_to((self.coords.1.x, self.coords.1.y)),
+                ),
+        );
+    }
+}
+
+impl<'a> AppendSvg for crate::primitives::Text<'a> {
+    fn append_svg(&self, doc: &mut svg::Document) {
+        let fill_color = match &self.fill_color {
+            Brush::Solid(alpha_color) => {
+                let colors = alpha_color.to_rgba8().to_u8_array();
+                format!(
+                    "#{:X}{:X}{:X}{:X}",
+                    colors[0], colors[1], colors[2], colors[3]
+                )
+            }
+            Brush::Gradient(gradient) => todo!(),
+            Brush::Image(image) => todo!(),
+        };
+
+        let text_anchor = match self.text_anchor {
+            Alignment::Start => "start",
+            Alignment::End => "end",
+            Alignment::Left => "left",
+            Alignment::Middle => "middle",
+            Alignment::Right => "right",
+            Alignment::Justified => "justified",
+        };
+
+        let style = format!("font-size:{}px;font-family:sans-serif", self.font_size);
+
+        doc.append(
+            svg::node::element::Text::new(&self.text)
+                .set("dominant-baseline", "central")
+                .set("text-anchor", text_anchor)
+                .set("style", style)
+                .set("fill", fill_color)
+                .set(
+                    "transform",
+                    format!("translate({} {})", self.translation.x, self.translation.y),
+                ),
+        );
+    }
 }

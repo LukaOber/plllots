@@ -1,5 +1,6 @@
 use crate::chart::{Chart, ChartPlotHelper};
 use crate::component::{AxisData, AxisHelper};
+use crate::{LineSeries, RenderSeries};
 use kurbo::{Affine, BezPath, Circle, Line, PathEl, Point, Rect, Size, Stroke};
 use parley::{Alignment, AlignmentOptions};
 use parley::{
@@ -241,56 +242,56 @@ impl VelloRenderer2 {
         y_data: &AxisData,
     ) {
         if let (AxisData::Category(x_items), AxisData::Values(y_items)) = (x_data, y_data) {
-            if let Some(AxisHelper::Values(y_axis_helper)) = &helper.y_axis {
-                let mut path = BezPath::new();
-                let mut points = Vec::new();
+            let mut path = BezPath::new();
+            let mut points = Vec::new();
 
-                for (index, (_x_item, y_item)) in x_items.iter().zip(y_items).enumerate() {
-                    let y_pos = {
+            for (index, (_x_item, y_item)) in x_items.iter().zip(y_items).enumerate() {
+                let y_pos =
+                    if let AxisHelper::Values(y_axis_helper) = &helper.y_axis.as_ref().unwrap() {
                         let percentage_height = y_item / y_axis_helper.max;
                         helper.offsets.y_axis_end - (percentage_height * helper.offsets.y_span)
-                    };
-
-                    let x_spacing = helper.offsets.x_span / x_items.len() as f64;
-                    let x_pos = helper.offsets.x_axis_start + (index as f64 + 0.5) * x_spacing;
-
-                    let point = Point::new(x_pos, y_pos);
-                    points.push(point);
-
-                    if index == 0 {
-                        path.move_to(point);
                     } else {
-                        path.line_to(point);
-                    }
-                }
+                        unreachable!()
+                    };
+                let x_spacing = helper.offsets.x_span / x_items.len() as f64;
+                let x_pos = helper.offsets.x_axis_start + (index as f64 + 0.5) * x_spacing;
 
-                // Draw the line
+                let point = Point::new(x_pos, y_pos);
+                points.push(point);
+
+                if index == 0 {
+                    path.move_to(point);
+                } else {
+                    path.line_to(point);
+                }
+            }
+
+            // Draw the line
+            scene.stroke(
+                &Stroke::new(2.0),
+                Affine::IDENTITY,
+                &Brush::Solid(Color::from_rgb8(84, 112, 198)),
+                None,
+                &path,
+            );
+
+            // Draw the points
+            for point in points {
+                let circle = Circle::new(point, 3.0);
+                scene.fill(
+                    Fill::NonZero,
+                    Affine::IDENTITY,
+                    &Brush::Solid(Color::WHITE),
+                    None,
+                    &circle,
+                );
                 scene.stroke(
                     &Stroke::new(2.0),
                     Affine::IDENTITY,
                     &Brush::Solid(Color::from_rgb8(84, 112, 198)),
                     None,
-                    &path,
+                    &circle,
                 );
-
-                // Draw the points
-                for point in points {
-                    let circle = Circle::new(point, 3.0);
-                    scene.fill(
-                        Fill::NonZero,
-                        Affine::IDENTITY,
-                        &Brush::Solid(Color::WHITE),
-                        None,
-                        &circle,
-                    );
-                    scene.stroke(
-                        &Stroke::new(2.0),
-                        Affine::IDENTITY,
-                        &Brush::Solid(Color::from_rgb8(84, 112, 198)),
-                        None,
-                        &circle,
-                    );
-                }
             }
         }
     }
@@ -301,23 +302,20 @@ impl Default for VelloRenderer2 {
         Self::new()
     }
 }
-pub struct VelloRenderer;
+pub struct VelloRenderer {
+    font_cx: FontContext,
+    layout_cx: LayoutContext,
+}
 
 impl VelloRenderer {
     pub fn new() -> Self {
-        Self
+        Self {
+            font_cx: FontContext::new(),
+            layout_cx: LayoutContext::new(),
+        }
     }
 
     pub fn render_to_scene(&mut self, chart: &Chart, scene: &mut Scene) {
-        let mut helper = ChartPlotHelper {
-            plot_size: chart.size,
-            margins: chart.margins,
-            offsets: crate::element::Offsets::from_margin(&chart.size, &chart.margins),
-            y_axis: None,
-            x_axis: None,
-        };
-
-        // Clear background
         scene.fill(
             Fill::NonZero,
             Affine::IDENTITY,
@@ -326,6 +324,16 @@ impl VelloRenderer {
             &Rect::new(0.0, 0.0, chart.size.width, chart.size.height),
         );
 
+        let primitives = chart.generate_primitives();
+        // println!("{:#?}", primitives);
+        let helper = chart.create_plot_helper();
+
+        for primitive in primitives {
+            // primitive.append_svg(&mut doc);
+        }
+        // Render series data
+        let line_series = LineSeries;
+        line_series.render_line_series(scene, &helper, &chart.x_axis.data, &chart.y_axis.data);
         // // Render axes
         // self.render_x_axis(scene, &helper, &chart.x_axis.data);
         // self.render_y_axis(scene, &helper, &chart.y_axis.data);

@@ -55,11 +55,9 @@ pub use series::{LineSeries, RenderSeries};
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::time::Instant;
 
     #[test]
     fn it_works() {
-        let instant = Instant::now();
         let chart = Chart::builder()
             .size(PlotSize {
                 width: 1000.0,

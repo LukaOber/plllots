@@ -1,9 +1,12 @@
 use crate::chart::ChartPlotHelper;
 use crate::component::{AxisData, AxisHelper};
+use kurbo::{Affine, BezPath, Point, Stroke};
+use peniko::{Brush, Color, Fill};
 use svg::{
     Document, Node,
     node::element::{Circle, Path},
 };
+use vello::Scene;
 
 /// Trait for rendering series data to SVG.
 pub trait RenderSeries {
@@ -32,6 +35,7 @@ impl RenderSeries for LineSeries {
             (AxisData::Category(x_items), AxisData::Values(y_items)) => {
                 let mut path = String::new();
                 let mut symbols = Vec::new();
+                println!("{:#?}", &helper);
 
                 for (index, (_x_item, y_item)) in x_items.iter().zip(y_items).enumerate() {
                     let y_pos = if let AxisHelper::Values(y_axis_helper) =
@@ -80,6 +84,72 @@ impl RenderSeries for LineSeries {
             }
             (AxisData::Values(_x_items), AxisData::Category(_y_items)) => todo!(),
             (AxisData::Values(_x_items), AxisData::Values(_y_items)) => todo!(),
+        }
+    }
+}
+
+impl LineSeries {
+    pub(crate) fn render_line_series(
+        &self,
+        scene: &mut Scene,
+        helper: &ChartPlotHelper,
+        x_data: &AxisData,
+        y_data: &AxisData,
+    ) {
+        if let (AxisData::Category(x_items), AxisData::Values(y_items)) = (x_data, y_data) {
+            if let Some(AxisHelper::Values(y_axis_helper)) = &helper.y_axis {
+                let mut path = BezPath::new();
+                let mut points = Vec::new();
+
+                for (index, (_x_item, y_item)) in x_items.iter().zip(y_items).enumerate() {
+                    let y_pos = {
+                        let percentage_height = y_item / y_axis_helper.max;
+                        helper.offsets.y_axis_end - (percentage_height * helper.offsets.y_span)
+                    };
+
+                    let x_spacing = helper.offsets.x_span / x_items.len() as f64;
+                    let x_pos = helper.offsets.x_axis_start + (index as f64 + 0.5) * x_spacing;
+
+                    let point = Point::new(x_pos, y_pos);
+                    points.push(point);
+
+                    if index == 0 {
+                        path.move_to(point);
+                    } else {
+                        path.line_to(point);
+                    }
+                }
+
+                println!("{:#?}", &points);
+
+                // Draw the line
+                scene.stroke(
+                    &Stroke::new(2.0),
+                    Affine::IDENTITY,
+                    &Brush::Solid(Color::from_rgb8(84, 112, 198)),
+                    None,
+                    &path,
+                );
+
+                // Draw the points
+                for point in points {
+                    let circle = kurbo::Circle::new(point, 3.0);
+                    scene.fill(
+                        Fill::NonZero,
+                        Affine::IDENTITY,
+                        &Brush::Solid(Color::WHITE),
+                        None,
+                        &circle,
+                    );
+                    scene.stroke(
+                        &Stroke::new(2.0),
+                        Affine::IDENTITY,
+                        &Brush::Solid(Color::from_rgb8(84, 112, 198)),
+                        None,
+                        &circle,
+                    );
+                }
+            }
         }
     }
 }
