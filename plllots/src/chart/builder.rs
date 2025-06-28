@@ -4,7 +4,7 @@ use crate::coordinate_system::CoordinateSystem;
 use crate::element::{Margins, Offsets, PlotSize};
 use crate::primitives::{AppendPrimitives, Primitives};
 use crate::renderer::AppendSvg;
-use crate::series::{LineSeries, RenderSeries};
+use crate::series::RenderSeries;
 use bon::Builder;
 use svg::{Document, node::element::Rectangle};
 

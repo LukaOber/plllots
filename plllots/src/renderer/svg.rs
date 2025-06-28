@@ -8,7 +8,7 @@ use svg::{Document, Node};
 use crate::chart::Chart;
 use crate::component::AxisHelper;
 use crate::primitives::AppendPrimitives;
-use crate::{CartesianAxis, LineSeries, RenderSeries};
+use crate::{CartesianAxis, RenderSeries};
 use std::io::Result;
 
 pub struct SvgRenderer;

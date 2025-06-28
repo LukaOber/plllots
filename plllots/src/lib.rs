@@ -51,7 +51,7 @@ pub use chart::{Chart, ChartPlotHelper};
 pub use component::{CartesianAxis, XAxis, YAxis};
 pub use element::{MarginType, Margins, Offsets, PlotSize};
 pub use renderer::SvgRenderer;
-pub use series::{LineSeries, RenderSeries};
+pub use series::RenderSeries;
 
 #[cfg(test)]
 mod tests {
@@ -70,18 +70,17 @@ mod tests {
                 Cartesian::builder()
                     .x_axis(
                         XAxis::builder()
-                            .data(CartesianAxis::Category(bon::vec![
+                            .cartesian_axis(CartesianAxis::Category(bon::vec![
                                 "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun",
                             ]))
                             .build(),
                     )
                     .y_axis(
                         YAxis::builder()
-                            .data(CartesianAxis::Values(vec![
-                                150.0, 230.0, 224.0, 218.0, 135.0, 147.0, 260.0,
-                            ]))
+                            .cartesian_axis(CartesianAxis::Values)
                             .build(),
                     )
+                    .data(vec![150.0, 230.0, 224.0, 218.0, 135.0, 147.0, 260.0])
                     .build(),
             ))
             .build();

@@ -17,8 +17,7 @@ impl<'a> AppendPrimitives<'a> for CoordinateSystem {
     ) {
         match self {
             CoordinateSystem::Cartesian(cartesian) => {
-                cartesian.x_axis.append_primitives(primitives, helper);
-                cartesian.y_axis.append_primitives(primitives, helper);
+                cartesian.append_primitives(primitives, helper);
             }
         }
     }

@@ -1,6 +1,6 @@
+use crate::RenderSeries;
 use crate::chart::{Chart, ChartPlotHelper};
 use crate::component::{AxisHelper, CartesianAxis};
-use crate::{LineSeries, RenderSeries};
 use kurbo::{Affine, BezPath, Circle, Line, PathEl, Point, Rect, Size, Stroke};
 use parley::{Alignment, AlignmentOptions};
 use parley::{
