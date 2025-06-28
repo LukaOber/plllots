@@ -1,5 +1,5 @@
 use crate::chart::ChartPlotHelper;
-use crate::component::{AxisData, AxisHelper};
+use crate::component::{AxisHelper, CartesianAxis};
 use kurbo::{Affine, BezPath, Point, Stroke};
 use peniko::{Brush, Color, Fill};
 use svg::{
@@ -14,8 +14,8 @@ pub trait RenderSeries {
         &self,
         doc: &mut Document,
         helper: &ChartPlotHelper,
-        x_data: &AxisData,
-        y_data: &AxisData,
+        x_data: &CartesianAxis,
+        y_data: &CartesianAxis,
     );
 }
 
@@ -27,12 +27,12 @@ impl RenderSeries for LineSeries {
         &self,
         doc: &mut Document,
         helper: &ChartPlotHelper,
-        x_data: &AxisData,
-        y_data: &AxisData,
+        x_data: &CartesianAxis,
+        y_data: &CartesianAxis,
     ) {
         match (x_data, y_data) {
-            (AxisData::Category(_x_items), AxisData::Category(_y_items)) => todo!(),
-            (AxisData::Category(x_items), AxisData::Values(y_items)) => {
+            (CartesianAxis::Category(_x_items), CartesianAxis::Category(_y_items)) => todo!(),
+            (CartesianAxis::Category(x_items), CartesianAxis::Values(y_items)) => {
                 let mut path = String::new();
                 let mut symbols = Vec::new();
 
@@ -81,8 +81,8 @@ impl RenderSeries for LineSeries {
                     doc.append(symbol);
                 }
             }
-            (AxisData::Values(_x_items), AxisData::Category(_y_items)) => todo!(),
-            (AxisData::Values(_x_items), AxisData::Values(_y_items)) => todo!(),
+            (CartesianAxis::Values(_x_items), CartesianAxis::Category(_y_items)) => todo!(),
+            (CartesianAxis::Values(_x_items), CartesianAxis::Values(_y_items)) => todo!(),
         }
     }
 }
@@ -92,10 +92,11 @@ impl LineSeries {
         &self,
         scene: &mut Scene,
         helper: &ChartPlotHelper,
-        x_data: &AxisData,
-        y_data: &AxisData,
+        x_data: &CartesianAxis,
+        y_data: &CartesianAxis,
     ) {
-        if let (AxisData::Category(x_items), AxisData::Values(y_items)) = (x_data, y_data) {
+        if let (CartesianAxis::Category(x_items), CartesianAxis::Values(y_items)) = (x_data, y_data)
+        {
             if let Some(AxisHelper::Values(y_axis_helper)) = &helper.y_axis {
                 let mut path = BezPath::new();
                 let mut points = Vec::new();

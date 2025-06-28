@@ -7,10 +7,8 @@ use svg::{
     node::element::{Path, Text, path::Data},
 };
 
-/// Data that can be displayed on an axis.
 #[derive(Debug, Clone)]
-pub enum AxisData {
-    /// Categorical data (labels)
+pub enum CartesianAxis {
     Category(Vec<String>),
     /// Numerical data (values)
     Values(Vec<f64>),
@@ -25,7 +23,7 @@ pub struct XAxis {
     pub axis_color: Brush,
     #[builder(default = peniko::Brush::Solid(Color::from_rgba8(0x6e, 0x70, 0x79, 0xff)))]
     pub label_color: Brush,
-    pub data: AxisData,
+    pub data: CartesianAxis,
 }
 
 /// Y-axis configuration and data.
@@ -37,7 +35,7 @@ pub struct YAxis {
     pub axis_color: Brush,
     #[builder(default = peniko::Brush::Solid(Color::from_rgba8(0x6e, 0x70, 0x79, 0xff)))]
     pub label_color: Brush,
-    pub data: AxisData,
+    pub data: CartesianAxis,
 }
 
 /// Helper structures for axis calculations.
@@ -68,8 +66,8 @@ impl<'a> AppendPrimitives<'a> for YAxis {
         helper: &mut crate::chart::ChartPlotHelper,
     ) {
         match &self.data {
-            AxisData::Category(_items) => todo!(),
-            AxisData::Values(items) => {
+            CartesianAxis::Category(_items) => todo!(),
+            CartesianAxis::Values(items) => {
                 let (min, max, step_size) = calculate_axis_ticks(&items);
                 let sub_tick_spacing = helper.offsets.y_span / (max / step_size);
                 for sub_tick_index in 1..((max / step_size) as i32 + 1) {
@@ -118,7 +116,7 @@ impl<'a> AppendPrimitives<'a> for XAxis {
         helper: &mut crate::chart::ChartPlotHelper,
     ) {
         match &self.data {
-            AxisData::Category(items) => {
+            CartesianAxis::Category(items) => {
                 let line = crate::primitives::Line {
                     stroke: &self.stroke,
                     stroke_color: &self.axis_color,
@@ -163,7 +161,7 @@ impl<'a> AppendPrimitives<'a> for XAxis {
                     amount: items.len(),
                 }))
             }
-            AxisData::Values(_items) => todo!(),
+            CartesianAxis::Values(_items) => todo!(),
         }
     }
 }

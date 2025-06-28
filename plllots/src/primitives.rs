@@ -8,7 +8,7 @@ use svg::{
     node::element::{Path, path::Data},
 };
 
-use crate::renderer::AppendSvg;
+use crate::renderer::{AppendSvg, AppendVello};
 
 #[derive(Debug, Clone)]
 pub enum Primitives<'a> {
@@ -21,6 +21,19 @@ impl<'a> AppendSvg for Primitives<'a> {
         match self {
             Primitives::Line(line) => line.append_svg(doc),
             Primitives::Text(text) => text.append_svg(doc),
+        }
+    }
+}
+
+impl<'a> AppendVello for Primitives<'a> {
+    fn append_vello(
+        &self,
+        scene: &mut vello::Scene,
+        vello_render: &mut crate::renderer::VelloRenderer,
+    ) {
+        match self {
+            Primitives::Line(line) => line.append_vello(scene, vello_render),
+            Primitives::Text(text) => text.append_vello(scene, vello_render),
         }
     }
 }

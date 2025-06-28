@@ -7,7 +7,7 @@ use svg::{Document, Node};
 use crate::chart::Chart;
 use crate::component::AxisHelper;
 use crate::primitives::AppendPrimitives;
-use crate::{AxisData, LineSeries, RenderSeries};
+use crate::{CartesianAxis, LineSeries, RenderSeries};
 use std::io::Result;
 
 pub struct SvgRenderer;
@@ -34,33 +34,14 @@ impl SvgRenderer {
         // Render axes
         let primitives = chart.generate_primitives();
         let mut helper = chart.create_plot_helper();
-
-        match &chart.x_axis.data {
-            AxisData::Category(items) => {
-                helper.x_axis = Some(AxisHelper::Category(crate::component::AxisCategoryHelper {
-                    amount: items.len(),
-                }));
-            }
-            AxisData::Values(_) => todo!("Values X-axis not implemented yet"),
-        }
-
-        match &chart.y_axis.data {
-            AxisData::Values(items) => {
-                let (min, max, step_size) = crate::utils::calculate_axis_ticks(&items);
-                helper.y_axis = Some(AxisHelper::Values(crate::component::AxisValuesHelper {
-                    min,
-                    max,
-                    step_size,
-                }));
-            }
-            AxisData::Category(_) => todo!("Category Y-axis not implemented yet"),
-        }
         for primitive in primitives {
+            // println!("{:#?}", primitive);
             primitive.append_svg(&mut doc);
         }
-        // Render series data
-        let line_series = LineSeries;
-        line_series.render_to_svg(&mut doc, &helper, &chart.x_axis.data, &chart.y_axis.data);
+
+        // // Render series data
+        // let line_series = LineSeries;
+        // line_series.render_to_svg(&mut doc, &helper, &chart.x_axis.data, &chart.y_axis.data);
         doc
     }
 
