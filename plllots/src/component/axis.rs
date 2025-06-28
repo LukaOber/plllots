@@ -99,11 +99,41 @@ impl<'a> AppendPrimitives<'a> for YAxis {
                     primitives.push(crate::primitives::Primitives::Text(text));
                 }
 
+                // TODO calulate helper earlier
                 helper.y_axis = Some(AxisHelper::Values(AxisValuesHelper {
                     min,
                     max,
                     step_size,
-                }))
+                }));
+
+                // TODO: Data does not belong here
+                let mut path = crate::primitives::Path {
+                    stroke: &self.stroke,
+                    stroke_color: &self.axis_color,
+                    coords: Vec::with_capacity(items.len()),
+                };
+                for (index, y_item) in items.iter().enumerate() {
+                    let y_pos = if let AxisHelper::Values(y_axis_helper) =
+                        &helper.y_axis.as_ref().unwrap()
+                    {
+                        let percentage_height = y_item / y_axis_helper.max;
+                        helper.offsets.y_axis_end - (percentage_height * helper.offsets.y_span)
+                    } else {
+                        unreachable!()
+                    };
+
+                    match helper.x_axis.as_ref().unwrap() {
+                        AxisHelper::Category(axis_category_helper) => {
+                            let x_spacing =
+                                helper.offsets.x_span / axis_category_helper.amount as f64;
+                            let x_pos =
+                                helper.offsets.x_axis_start + (index as f64 + 0.5) * x_spacing;
+                            path.coords.push(Point::new(x_pos, y_pos));
+                        }
+                        AxisHelper::Values(axis_values_helper) => todo!(),
+                    }
+                }
+                primitives.push(crate::primitives::Primitives::Path(path));
             }
         }
     }
@@ -157,6 +187,7 @@ impl<'a> AppendPrimitives<'a> for XAxis {
                     primitives.push(crate::primitives::Primitives::Text(text));
                 }
 
+                // TODO calulate helper earlier
                 helper.x_axis = Some(AxisHelper::Category(AxisCategoryHelper {
                     amount: items.len(),
                 }))

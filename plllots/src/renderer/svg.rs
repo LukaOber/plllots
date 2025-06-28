@@ -1,3 +1,4 @@
+use kurbo::BezPath;
 use parley::Alignment;
 use peniko::Brush;
 use svg::node::element::path::Data;
@@ -123,6 +124,39 @@ impl<'a> AppendSvg for crate::primitives::Text<'a> {
                     "transform",
                     format!("translate({} {})", self.coord.x, self.coord.y),
                 ),
+        );
+    }
+}
+
+impl<'a> AppendSvg for crate::primitives::Path<'a> {
+    fn append_svg(&self, doc: &mut svg::Document) {
+        let stroke_color = match &self.stroke_color {
+            Brush::Solid(alpha_color) => {
+                let colors = alpha_color.to_rgba8().to_u8_array();
+                format!(
+                    "#{:X}{:X}{:X}{:X}",
+                    colors[0], colors[1], colors[2], colors[3]
+                )
+            }
+            Brush::Gradient(gradient) => todo!(),
+            Brush::Image(image) => todo!(),
+        };
+
+        let mut path = Data::new();
+        for (index, point) in self.coords.iter().enumerate() {
+            if index == 0 {
+                path = path.move_to((point.x, point.y));
+            } else {
+                path = path.line_to((point.x, point.y));
+            }
+        }
+
+        doc.append(
+            Path::new()
+                .set("stroke", stroke_color)
+                .set("stroke-width", self.stroke.width)
+                .set("fill", "transparent")
+                .set("d", path),
         );
     }
 }

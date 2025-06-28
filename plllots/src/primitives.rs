@@ -3,10 +3,6 @@ use std::fmt::Display;
 use kurbo::{Point, Stroke};
 use parley::Alignment;
 use peniko::Brush;
-use svg::{
-    Node,
-    node::element::{Path, path::Data},
-};
 
 use crate::renderer::{AppendSvg, AppendVello};
 
@@ -14,6 +10,7 @@ use crate::renderer::{AppendSvg, AppendVello};
 pub enum Primitives<'a> {
     Line(Line<'a>),
     Text(Text<'a>),
+    Path(Path<'a>),
 }
 
 impl<'a> AppendSvg for Primitives<'a> {
@@ -21,6 +18,7 @@ impl<'a> AppendSvg for Primitives<'a> {
         match self {
             Primitives::Line(line) => line.append_svg(doc),
             Primitives::Text(text) => text.append_svg(doc),
+            Primitives::Path(path) => path.append_svg(doc),
         }
     }
 }
@@ -34,6 +32,7 @@ impl<'a> AppendVello for Primitives<'a> {
         match self {
             Primitives::Line(line) => line.append_vello(scene, vello_render),
             Primitives::Text(text) => text.append_vello(scene, vello_render),
+            Primitives::Path(path) => todo!(),
         }
     }
 }
@@ -60,4 +59,11 @@ pub struct Text<'a> {
     pub font_size: f64,
     pub text_anchor: Alignment,
     pub coord: Point,
+}
+
+#[derive(Debug, Clone)]
+pub struct Path<'a> {
+    pub stroke: &'a Stroke,
+    pub stroke_color: &'a Brush,
+    pub coords: Vec<Point>,
 }
