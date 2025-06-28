@@ -39,6 +39,7 @@
 pub mod chart;
 pub mod component;
 pub mod element;
+mod primitives;
 pub mod renderer;
 pub mod series;
 pub mod utils;
@@ -46,7 +47,7 @@ pub mod utils;
 // Re-export commonly used items for convenience
 pub use bon;
 pub use chart::{Chart, ChartPlotHelper};
-pub use component::{AppendSvg, AxisData, XAxis, YAxis};
+pub use component::{AxisData, XAxis, YAxis};
 pub use element::{MarginType, Margins, Offsets, PlotSize};
 pub use renderer::SvgRenderer;
 pub use series::{LineSeries, RenderSeries};
@@ -82,5 +83,6 @@ mod tests {
 
         let renderer = SvgRenderer::new();
         renderer.save(&chart, "line.svg").unwrap();
+        assert!(false)
     }
 }

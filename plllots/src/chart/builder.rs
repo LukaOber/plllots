@@ -1,6 +1,8 @@
 use super::ChartPlotHelper;
-use crate::component::{AppendSvg, XAxis, YAxis};
+use crate::component::{XAxis, YAxis};
 use crate::element::{Margins, Offsets, PlotSize};
+use crate::primitives::{AppendPrimitives, Primitives};
+use crate::renderer::AppendSvg;
 use crate::series::{LineSeries, RenderSeries};
 use bon::Builder;
 use svg::{Document, node::element::Rectangle};
@@ -20,37 +22,21 @@ pub struct Chart {
 }
 
 impl Chart {
-    /// Convert the chart to an SVG document.
-    pub fn to_svg(&self) -> Document {
-        let mut helper = ChartPlotHelper {
+    pub(crate) fn create_plot_helper(&self) -> ChartPlotHelper {
+        ChartPlotHelper {
             plot_size: self.size,
             margins: self.margins,
             offsets: Offsets::from_margin(&self.size, &self.margins),
             y_axis: None,
             x_axis: None,
-        };
+        }
+    }
 
-        let mut doc = Document::new()
-            .set("width", self.size.width)
-            .set("height", self.size.height)
-            .set("viewBox", (0, 0, self.size.width, self.size.height))
-            .add(
-                Rectangle::new()
-                    .set("width", self.size.width)
-                    .set("height", self.size.height)
-                    .set("x", 0)
-                    .set("y", 0)
-                    .set("fill", "none"),
-            );
-
-        // Render axes
-        self.x_axis.append_svg(&mut doc, &mut helper);
-        self.y_axis.append_svg(&mut doc, &mut helper);
-
-        // Render series data
-        let line_series = LineSeries;
-        line_series.render_to_svg(&mut doc, &helper, &self.x_axis.data, &self.y_axis.data);
-
-        doc
+    pub(crate) fn generate_primitives(&self) -> Vec<Primitives> {
+        let mut helper = self.create_plot_helper();
+        let mut primitives = Vec::new();
+        self.x_axis.append_primitives(&mut primitives, &mut helper);
+        self.y_axis.append_primitives(&mut primitives, &mut helper);
+        primitives
     }
 }

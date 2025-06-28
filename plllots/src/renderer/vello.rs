@@ -10,12 +10,12 @@ use peniko::{Brush, Color, Fill};
 use vello::{AaConfig, RenderParams, Renderer, Scene};
 
 /// Vello renderer for charts.
-pub struct VelloRenderer {
+pub struct VelloRenderer2 {
     font_cx: FontContext,
     layout_cx: LayoutContext<Brush>,
 }
 
-impl VelloRenderer {
+impl VelloRenderer2 {
     /// Create a new Vello renderer.
     pub fn new() -> Self {
         Self {
@@ -206,7 +206,7 @@ impl VelloRenderer {
                     let sub_tick_height =
                         helper.offsets.y_axis_end - (sub_tick_index as f64 * sub_tick_spacing);
                     let label_text = format!(
-                        "{}",
+                        "{}W",
                         y_axis_helper.min + y_axis_helper.step_size * sub_tick_index as f64
                     );
                     let layout = layout_builder.build(label_text);
@@ -296,8 +296,45 @@ impl VelloRenderer {
     }
 }
 
-impl Default for VelloRenderer {
+impl Default for VelloRenderer2 {
     fn default() -> Self {
         Self::new()
     }
+}
+pub struct VelloRenderer;
+
+impl VelloRenderer {
+    pub fn new() -> Self {
+        Self
+    }
+
+    pub fn render_to_scene(&mut self, chart: &Chart, scene: &mut Scene) {
+        let mut helper = ChartPlotHelper {
+            plot_size: chart.size,
+            margins: chart.margins,
+            offsets: crate::element::Offsets::from_margin(&chart.size, &chart.margins),
+            y_axis: None,
+            x_axis: None,
+        };
+
+        // Clear background
+        scene.fill(
+            Fill::NonZero,
+            Affine::IDENTITY,
+            &Brush::Solid(Color::WHITE),
+            None,
+            &Rect::new(0.0, 0.0, chart.size.width, chart.size.height),
+        );
+
+        // // Render axes
+        // self.render_x_axis(scene, &helper, &chart.x_axis.data);
+        // self.render_y_axis(scene, &helper, &chart.y_axis.data);
+
+        // // Render line series
+        // self.render_line_series(scene, &helper, &chart.x_axis.data, &chart.y_axis.data);
+    }
+}
+
+pub trait AppendVello {
+    fn append_vello(&self, scene: &mut Scene, helper: &mut ChartPlotHelper);
 }
