@@ -39,7 +39,7 @@ let chart = Chart::builder()
     .build();
 
 let renderer = SvgRenderer::new();
-renderer.save(&chart, "line.svg").unwrap();
+z<renderer.save(&chart, "line.svg").unwrap();
 ``` */
 pub mod chart;
 pub mod component;
@@ -56,7 +56,7 @@ pub use bon;
 mod tests {
     use crate::{
         chart::Chart,
-        component::{CartesianAxis, XAxis, YAxis},
+        component::{CartesianAxis, CartesianAxisLine, XAxis, YAxis},
         coordinate_system::{Cartesian, CoordinateSystem},
         element::PlotSize,
         renderer::SvgRenderer,
@@ -64,6 +64,7 @@ mod tests {
 
     #[test]
     fn it_works() {
+        let instant = std::time::Instant::now();
         let chart = Chart::builder()
             .size(PlotSize {
                 width: 1000.0,
@@ -73,22 +74,21 @@ mod tests {
                 Cartesian::builder()
                     .x_axis(
                         XAxis::builder()
-                            .cartesian_axis(CartesianAxis::Category(bon::vec![
+                            .axis_line(CartesianAxisLine::builder().show(false).build())
+                            .axis_type(CartesianAxis::Category(bon::vec![
                                 "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun",
                             ]))
                             .build(),
                     )
-                    .y_axis(
-                        YAxis::builder()
-                            .cartesian_axis(CartesianAxis::Values)
-                            .build(),
-                    )
+                    .y_axis(YAxis::builder().axis_type(CartesianAxis::Values).build())
                     .data(vec![150.0, 230.0, 224.0, 218.0, 135.0, 147.0, 260.0])
                     .build(),
             ))
             .build();
 
+        println!("{:?}", instant.elapsed());
         let renderer = SvgRenderer::new();
         renderer.save(&chart, "line.svg").unwrap();
+        assert!(false)
     }
 }
