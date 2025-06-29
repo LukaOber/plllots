@@ -56,7 +56,7 @@ pub use bon;
 mod tests {
     use crate::{
         chart::Chart,
-        component::{CartesianAxis, CartesianAxisLine, XAxis, YAxis},
+        component::{CartesianAxis, XAxis, YAxis},
         coordinate_system::{Cartesian, CoordinateSystem},
         element::PlotSize,
         renderer::SvgRenderer,
@@ -74,7 +74,6 @@ mod tests {
                 Cartesian::builder()
                     .x_axis(
                         XAxis::builder()
-                            .axis_line(CartesianAxisLine::builder().show(false).build())
                             .axis_type(CartesianAxis::Category(bon::vec![
                                 "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun",
                             ]))
