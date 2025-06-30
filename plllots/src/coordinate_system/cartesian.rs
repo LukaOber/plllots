@@ -4,14 +4,28 @@ use kurbo::Point;
 use crate::{
     component::{CartesianAxis, XAxis, YAxis},
     primitives::AppendPrimitives,
+    series::Series,
     utils::calculate_axis_ticks,
 };
 
 #[derive(Debug, Builder, Clone)]
 pub struct Cartesian {
+    #[builder(field)]
+    pub series: Vec<Series>,
     pub x_axis: XAxis,
     pub y_axis: YAxis,
-    pub data: Vec<f64>,
+}
+
+impl<S: cartesian_builder::State> CartesianBuilder<S> {
+    pub fn add_series(mut self, series: impl Into<Series>) -> Self {
+        self.series.push(series.into());
+        self
+    }
+
+    pub fn set_series(mut self, series: impl IntoIterator<Item: Into<Series>>) -> Self {
+        self.series = series.into_iter().map(Into::into).collect();
+        self
+    }
 }
 
 impl<'a> AppendPrimitives<'a> for Cartesian {
@@ -74,7 +88,10 @@ impl<'a> AppendPrimitives<'a> for Cartesian {
                     }
                 }
 
-                let (min, max, step_size) = calculate_axis_ticks(&self.data);
+                let data = match self.series[0] {
+                    Series::Line(ref line) => &line.data,
+                };
+                let (min, max, step_size) = calculate_axis_ticks(data);
                 let sub_tick_spacing = helper.offsets.y_span / (max / step_size);
 
                 // Y-Axis
@@ -128,22 +145,44 @@ impl<'a> AppendPrimitives<'a> for Cartesian {
                     }
                 }
 
-                let mut path = crate::primitives::Path {
-                    // TODO change stroke types
-                    stroke: &self.y_axis.axis_stroke,
-                    stroke_color: &self.y_axis.axis_color,
-                    coords: Vec::with_capacity(self.data.len()),
-                };
-                for (index, y_item) in self.data.iter().enumerate() {
-                    let y_pos = {
-                        let percentage_height = y_item / max;
-                        helper.offsets.y_axis_end - (percentage_height * helper.offsets.y_span)
-                    };
-                    let x_spacing = helper.offsets.x_span / x_items.len() as f64;
-                    let x_pos = helper.offsets.x_axis_start + (index as f64 + 0.5) * x_spacing;
-                    path.coords.push(Point::new(x_pos, y_pos));
+                match &self.series[0] {
+                    Series::Line(line) => {
+                        let mut path = crate::primitives::Path {
+                            // TODO change stroke types
+                            stroke: &line.stroke,
+                            stroke_color: &line.color,
+                            coords: Vec::with_capacity(line.data.len()),
+                        };
+                        for (index, y_item) in data.iter().enumerate() {
+                            let y_pos = {
+                                let percentage_height = y_item / max;
+                                helper.offsets.y_axis_end
+                                    - (percentage_height * helper.offsets.y_span)
+                            };
+                            let x_spacing = helper.offsets.x_span / x_items.len() as f64;
+                            let x_pos =
+                                helper.offsets.x_axis_start + (index as f64 + 0.5) * x_spacing;
+                            path.coords.push(Point::new(x_pos, y_pos));
+                        }
+                        primitives.push(crate::primitives::Primitives::Path(path));
+                    }
                 }
-                primitives.push(crate::primitives::Primitives::Path(path));
+                // let mut path = crate::primitives::Path {
+                //     // TODO change stroke types
+                //     stroke: &self.y_axis.axis_stroke,
+                //     stroke_color: &self.y_axis.axis_color,
+                //     coords: Vec::with_capacity(self.series.len()),
+                // };
+                // for (index, y_item) in data.iter().enumerate() {
+                //     let y_pos = {
+                //         let percentage_height = y_item / max;
+                //         helper.offsets.y_axis_end - (percentage_height * helper.offsets.y_span)
+                //     };
+                //     let x_spacing = helper.offsets.x_span / x_items.len() as f64;
+                //     let x_pos = helper.offsets.x_axis_start + (index as f64 + 0.5) * x_spacing;
+                //     path.coords.push(Point::new(x_pos, y_pos));
+                // }
+                // primitives.push(crate::primitives::Primitives::Path(path));
             }
             (CartesianAxis::Values, CartesianAxis::Category(_y_items)) => {
                 todo!()

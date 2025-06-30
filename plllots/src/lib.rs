@@ -60,6 +60,7 @@ mod tests {
         coordinate_system::{Cartesian, CoordinateSystem},
         element::PlotSize,
         renderer::SvgRenderer,
+        series::Line,
     };
 
     #[test]
@@ -80,7 +81,11 @@ mod tests {
                             .build(),
                     )
                     .y_axis(YAxis::builder().axis_type(CartesianAxis::Values).build())
-                    .data(vec![150.0, 230.0, 224.0, 218.0, 135.0, 147.0, 260.0])
+                    .add_series(
+                        Line::builder()
+                            .data(vec![150.0, 230.0, 224.0, 218.0, 135.0, 147.0, 260.0])
+                            .build(),
+                    )
                     .build(),
             ))
             .build();
