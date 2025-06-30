@@ -9,9 +9,45 @@ pub enum CartesianAxis {
     Values,
 }
 
+#[derive(Debug, Clone)]
+pub enum XAxes {
+    Single(XAxis),
+    Multiple(Vec<XAxis>),
+}
+
+impl From<Vec<XAxis>> for XAxes {
+    fn from(value: Vec<XAxis>) -> Self {
+        XAxes::Multiple(value)
+    }
+}
+
+impl From<XAxis> for XAxes {
+    fn from(value: XAxis) -> Self {
+        Self::Single(value)
+    }
+}
+
+#[derive(Debug, Clone)]
+pub enum YAxes {
+    Single(YAxis),
+    Multiple(Vec<YAxis>),
+}
+
+impl From<Vec<YAxis>> for YAxes {
+    fn from(value: Vec<YAxis>) -> Self {
+        YAxes::Multiple(value)
+    }
+}
+
+impl From<YAxis> for YAxes {
+    fn from(value: YAxis) -> Self {
+        Self::Single(value)
+    }
+}
+
 #[derive(Debug, Builder, Clone)]
 pub struct XAxis {
-    #[builder(default = true)]
+    #[builder(default = true, setters(option_fn(vis = "")))]
     pub axis_show: bool,
     #[builder(default = Stroke::new(1.0))]
     pub axis_stroke: Stroke,

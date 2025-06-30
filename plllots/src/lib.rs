@@ -73,13 +73,18 @@ mod tests {
             })
             .coordinate_system(CoordinateSystem::Cartesian(
                 Cartesian::builder()
-                    .x_axis(
+                    .x_axis(vec![
                         XAxis::builder()
                             .axis_type(CartesianAxis::Category(bon::vec![
                                 "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun",
                             ]))
                             .build(),
-                    )
+                        XAxis::builder()
+                            .axis_type(CartesianAxis::Category(bon::vec![
+                                "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun",
+                            ]))
+                            .build(),
+                    ])
                     .y_axis(YAxis::builder().axis_type(CartesianAxis::Values).build())
                     .add_series(
                         Line::builder()
