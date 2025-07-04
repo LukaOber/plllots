@@ -1,16 +1,16 @@
 use bon::Builder;
 use kurbo::Stroke;
-use peniko::{Brush, Color};
+use peniko::Brush;
 
 #[derive(Debug, Builder, Clone)]
 pub struct Line {
-    #[builder(default = Stroke::new(2.0))]
-    pub stroke: Stroke,
-    #[builder(default = Brush::Solid(Color::from_rgba8(0x54, 0x70, 0xd6, 0xff)))]
-    pub color: Brush,
-    pub data: Vec<f64>,
-    #[builder(default = 0)]
+    #[builder(setters(option_fn(vis = "")))]
+    pub stroke: Option<Stroke>,
+    #[builder(setters(option_fn(vis = "")))]
+    pub color: Option<Brush>,
+    #[builder(default = 0, setters(option_fn(vis = "")))]
     pub x_axis_index: usize,
-    #[builder(default = 0)]
+    #[builder(default = 0, setters(option_fn(vis = "")))]
     pub y_axis_index: usize,
+    pub data: Vec<f64>,
 }

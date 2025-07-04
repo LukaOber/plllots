@@ -106,14 +106,16 @@ impl<'a> AppendPrimitives<'a> for Cartesian {
                         );
                         self.series
                             .iter()
-                            .filter(|s| {
+                            .enumerate()
+                            .filter(|(_i, s)| {
                                 x_axis_index == s.x_axis_index() && y_axis_index == s.y_axis_index()
                             })
-                            .for_each(|s| match s {
+                            .for_each(|(i, s)| match s {
                                 Series::Line(line) => {
                                     let mut path = crate::primitives::Path {
-                                        stroke: &line.stroke,
-                                        stroke_color: &line.color,
+                                        stroke: line.stroke.as_ref().unwrap_or(&theme.line.stroke),
+                                        stroke_color: &theme.series_colors
+                                            [i % theme.series_colors.len()],
                                         coords: Vec::with_capacity(line.data.len()),
                                     };
                                     for (index, y_item) in line.data.iter().enumerate() {
@@ -207,14 +209,16 @@ impl<'a> AppendPrimitives<'a> for Cartesian {
                         );
                         self.series
                             .iter()
-                            .filter(|s| {
+                            .enumerate()
+                            .filter(|(_i, s)| {
                                 y_axis_index == s.x_axis_index() && x_axis_index == s.y_axis_index()
                             })
-                            .for_each(|s| match s {
+                            .for_each(|(i, s)| match s {
                                 Series::Line(line) => {
                                     let mut path = crate::primitives::Path {
-                                        stroke: &line.stroke,
-                                        stroke_color: &line.color,
+                                        stroke: line.stroke.as_ref().unwrap_or(&theme.line.stroke),
+                                        stroke_color: &theme.series_colors
+                                            [i % theme.series_colors.len()],
                                         coords: Vec::with_capacity(line.data.len()),
                                     };
                                     for (index, x_item) in line.data.iter().enumerate() {

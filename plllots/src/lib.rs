@@ -79,6 +79,9 @@ mod tests {
                         Line::builder()
                             .data(vec![150.0, 230.0, 224.0, 218.0, 135.0, 147.0, 260.0])
                             .build(),
+                        Line::builder()
+                            .data(vec![250.0, 330.0, 324.0, 318.0, 235.0, 247.0, 360.0])
+                            .build(),
                     ])
                     .build(),
             ))

@@ -40,6 +40,8 @@ pub struct Theme {
     pub background: Color,
     pub cartesian_category_axis: CartesianAxisTheme,
     pub cartesian_value_axis: CartesianAxisTheme,
+    pub line: LineTheme,
+    pub series_colors: Vec<Brush>,
 }
 
 impl Theme {
@@ -92,6 +94,20 @@ impl Theme {
                 labels_color: Brush::Solid(Color::from_rgba8(0x6e, 0x70, 0x79, 0xff)),
                 labels_font_size: 12.0,
             },
+            line: LineTheme {
+                stroke: Stroke::new(2.0),
+            },
+            series_colors: vec![
+                Brush::Solid(Color::from_rgba8(0x54, 0x70, 0xc6, 0xff)),
+                Brush::Solid(Color::from_rgba8(0x91, 0xcc, 0x75, 0xff)),
+                Brush::Solid(Color::from_rgba8(0xfa, 0xc8, 0x58, 0xff)),
+                Brush::Solid(Color::from_rgba8(0xee, 0x66, 0x66, 0xff)),
+                Brush::Solid(Color::from_rgba8(0x73, 0xc0, 0xde, 0xff)),
+                Brush::Solid(Color::from_rgba8(0x3b, 0xa2, 0x72, 0xff)),
+                Brush::Solid(Color::from_rgba8(0xfc, 0x84, 0x52, 0xff)),
+                Brush::Solid(Color::from_rgba8(0x9a, 0x60, 0xb4, 0xff)),
+                Brush::Solid(Color::from_rgba8(0xea, 0x7c, 0xcc, 0xff)),
+            ],
         }
     }
 }
@@ -113,4 +129,9 @@ pub struct CartesianAxisTheme {
     pub labels_margin: f64,
     pub labels_color: Brush,
     pub labels_font_size: f64,
+}
+
+#[derive(Debug, Clone)]
+pub struct LineTheme {
+    pub stroke: Stroke,
 }
