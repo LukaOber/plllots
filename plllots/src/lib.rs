@@ -78,7 +78,7 @@ mod tests {
                             .data(bon::vec!["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"])
                             .build(),
                     )
-                    .y_axis(ValueAxis::builder().build())
+                    .y_axis(ValueAxis::builder().axis_show(true).build())
                     .add_series(
                         Line::builder()
                             .data(vec![150.0, 230.0, 224.0, 218.0, 135.0, 147.0, 260.0])
