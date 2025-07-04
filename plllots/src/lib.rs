@@ -78,17 +78,13 @@ mod tests {
                             .data(bon::vec!["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"])
                             .build(),
                     )
-                    .y_axis(vec![
-                        ValueAxis::builder().ticks_show(true).build(),
-                        ValueAxis::builder().ticks_show(true).build(),
-                    ])
+                    .y_axis(vec![ValueAxis::builder().ticks_show(true).build()])
                     .set_series(vec![
                         Line::builder()
                             .data(vec![-150.0, 230.0, 224.0, 218.0, 135.0, 147.0, 260.0])
                             .build(),
                         Line::builder()
                             .data(vec![150.0, 230.0, 224.0, 218.0, 135.0, 147.0, 260.0])
-                            .y_axis_index(1)
                             .build(),
                     ])
                     .build(),
@@ -98,6 +94,6 @@ mod tests {
         println!("{:?}", instant.elapsed());
         let renderer = SvgRenderer::new();
         renderer.save(&chart, "line.svg").unwrap();
-        assert!(false)
+        panic!()
     }
 }

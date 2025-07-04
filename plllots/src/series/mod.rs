@@ -2,7 +2,7 @@ pub mod line;
 
 pub use line::*;
 
-use crate::utils::calculate_axis_ticks;
+use crate::utils::get_raw_range;
 
 #[derive(Debug, Clone)]
 pub enum Series {
@@ -16,9 +16,9 @@ impl From<Line> for Series {
 }
 
 impl Series {
-    pub(crate) fn calculate_axis_ticks(&self) -> (f64, f64, f64) {
+    pub(crate) fn get_raw_range(&self) -> (f64, f64) {
         match self {
-            Series::Line(line) => calculate_axis_ticks(&line.data),
+            Series::Line(line) => get_raw_range(&line.data),
         }
     }
 

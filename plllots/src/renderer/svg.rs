@@ -1,3 +1,4 @@
+use kurbo::Cap;
 use parley::Alignment;
 use peniko::Brush;
 use svg::node::element::path::Data;
@@ -66,10 +67,24 @@ impl AppendSvg for crate::primitives::Line<'_> {
             Brush::Gradient(_gradient) => todo!(),
             Brush::Image(_image) => todo!(),
         };
+        let cap = match (self.stroke.start_cap, self.stroke.end_cap) {
+            (Cap::Butt, Cap::Butt) => "butt",
+            // (Cap::Butt, Cap::Square) => todo!(),
+            // (Cap::Butt, Cap::Round) => todo!(),
+            // (Cap::Square, Cap::Butt) => todo!(),
+            (Cap::Square, Cap::Square) => "square",
+            // (Cap::Square, Cap::Round) => todo!(),
+            // (Cap::Round, Cap::Butt) => todo!(),
+            // (Cap::Round, Cap::Square) => todo!(),
+            (Cap::Round, Cap::Round) => "round",
+            _ => todo!(),
+        };
+
         doc.append(
             Path::new()
                 .set("stroke", stroke_color)
                 .set("stroke-width", self.stroke.width)
+                .set("stroke-linecap", cap)
                 .set(
                     "d",
                     Data::new()
