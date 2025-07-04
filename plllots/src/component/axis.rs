@@ -53,6 +53,8 @@ pub struct XAxis {
     pub axis_stroke: Stroke,
     #[builder(default = Brush::Solid(Color::from_rgba8(0x6e, 0x70, 0x79, 0xff)))]
     pub axis_color: Brush,
+    #[builder(name = axis_position)]
+    pub axis_position: Option<XAxisPosition>,
     #[builder(default = true)]
     pub ticks_show: bool,
     #[builder(default = 5.0)]
@@ -86,6 +88,7 @@ pub struct YAxis {
     pub axis_stroke: Stroke,
     #[builder(default = Brush::Solid(Color::from_rgba8(0x6e, 0x70, 0x79, 0xff)))]
     pub axis_color: Brush,
+    pub axis_position: Option<YAxisPosition>,
     #[builder(default = true)]
     pub ticks_show: bool,
     #[builder(default = 5.0)]
@@ -109,4 +112,16 @@ pub struct YAxis {
     #[builder(default = Alignment::Middle)]
     pub labels_alignment: Alignment,
     pub axis_type: CartesianAxis,
+}
+
+#[derive(Debug, Clone)]
+pub enum XAxisPosition {
+    Bottom,
+    Top,
+}
+
+#[derive(Debug, Clone)]
+pub enum YAxisPosition {
+    Left,
+    Right,
 }

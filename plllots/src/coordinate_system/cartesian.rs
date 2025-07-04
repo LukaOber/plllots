@@ -189,7 +189,6 @@ impl<'a> AppendPrimitives<'a> for Cartesian {
                     match &self.series[0] {
                         Series::Line(line) => {
                             let mut path = crate::primitives::Path {
-                                // TODO change stroke types
                                 stroke: &line.stroke,
                                 stroke_color: &line.color,
                                 coords: Vec::with_capacity(line.data.len()),
