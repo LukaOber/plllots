@@ -530,7 +530,7 @@ impl<'a> ValueAxis {
                             (helper.offsets.y_axis_start, helper.offsets.y_axis_end);
 
                         let common_x =
-                            helper.offsets.y_axis_start - (tick_index as f64 * tick_spacing);
+                            helper.offsets.x_axis_start + (tick_index as f64 * tick_spacing);
                         (Point::new(common_x, start_y), Point::new(common_x, end_y))
                     }
                     AxisType::YAxis => {
