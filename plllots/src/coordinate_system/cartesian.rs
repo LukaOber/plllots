@@ -1,10 +1,9 @@
 use bon::Builder;
+use itertools::iproduct;
 use kurbo::Point;
 
 use crate::{
-    component::{CartesianAxis, XAxes, YAxes},
-    primitives::AppendPrimitives,
-    series::Series,
+    component::CartesianAxis, primitives::AppendPrimitives, series::Series,
     utils::calculate_axis_ticks,
 };
 
@@ -12,10 +11,10 @@ use crate::{
 pub struct Cartesian {
     #[builder(field)]
     pub series: Vec<Series>,
-    #[builder(name = x_axis, into)]
-    pub x_axis: XAxes,
-    #[builder(name = y_axis, into)]
-    pub y_axis: YAxes,
+    #[builder(into)]
+    pub x_axis: CartesianAxis,
+    #[builder(into)]
+    pub y_axis: CartesianAxis,
 }
 
 impl<S: cartesian_builder::State> CartesianBuilder<S> {
@@ -28,26 +27,6 @@ impl<S: cartesian_builder::State> CartesianBuilder<S> {
         self.series = series.into_iter().map(Into::into).collect();
         self
     }
-
-    // pub fn add_y_axis(mut self, y_axis: impl Into<YAxis>) -> Self {
-    //     self.y_axis.push(y_axis.into());
-    //     self
-    // }
-
-    // pub fn set_y_axis(mut self, y_axis: impl IntoIterator<Item: Into<YAxis>>) -> Self {
-    //     self.y_axis = y_axis.into_iter().map(Into::into).collect();
-    //     self
-    // }
-
-    // pub fn add_x_axis(mut self, x_axis: impl Into<XAxis>) -> Self {
-    //     self.x_axis.push(x_axis.into());
-    //     self
-    // }
-
-    // pub fn set_x_axis(mut self, x_axis: impl IntoIterator<Item: Into<XAxis>>) -> Self {
-    //     self.x_axis = x_axis.into_iter().map(Into::into).collect();
-    //     self
-    // }
 }
 
 impl<'a> AppendPrimitives<'a> for Cartesian {
@@ -56,27 +35,13 @@ impl<'a> AppendPrimitives<'a> for Cartesian {
         primitives: &mut Vec<crate::primitives::Primitives<'a>>,
         helper: &mut crate::chart::ChartHelper,
     ) {
-        let all_axes = match (&self.x_axis, &self.y_axis) {
-            (XAxes::Single(x_axis), YAxes::Single(y_axis)) => vec![(x_axis, y_axis, 0, 0)],
-            (XAxes::Single(x_axis), YAxes::Multiple(items)) => items
-                .into_iter()
-                .enumerate()
-                .map(|(i, y_axis)| (x_axis, y_axis, 0, i))
-                .collect(),
-            (XAxes::Multiple(items), YAxes::Single(y_axis)) => items
-                .into_iter()
-                .enumerate()
-                .map(|(i, x_axis)| (x_axis, y_axis, i, 0))
-                .collect(),
-            (XAxes::Multiple(_x_items), YAxes::Multiple(_y_items)) => panic!("unsupported"),
-        };
-
-        for (x_axis, y_axis, x_axis_index, y_axis_index) in all_axes {
-            match (&x_axis.axis_type, &y_axis.axis_type) {
-                (CartesianAxis::Category(_x_items), CartesianAxis::Category(_y_items)) => {
-                    todo!()
-                }
-                (CartesianAxis::Category(x_items), CartesianAxis::Values) => {
+        match (&self.x_axis, &self.y_axis) {
+            (CartesianAxis::Category(x_axes), CartesianAxis::Category(y_axes)) => todo!(),
+            (CartesianAxis::Category(x_axes), CartesianAxis::Value(y_axes)) => {
+                for ((x_axis_index, x_axis), (y_axis_index, y_axis)) in iproduct!(
+                    x_axes.into_iter().enumerate(),
+                    y_axes.into_iter().enumerate()
+                ) {
                     // X-Axis
                     if x_axis.axis_show {
                         let line = crate::primitives::Line {
@@ -92,8 +57,8 @@ impl<'a> AppendPrimitives<'a> for Cartesian {
 
                     // X-Axis ticks
                     if x_axis.ticks_show {
-                        let label_spacing = helper.offsets.x_span / x_items.len() as f64;
-                        for label_index in 0..=x_items.len() {
+                        let label_spacing = helper.offsets.x_span / x_axis.data.len() as f64;
+                        for label_index in 0..=x_axis.data.len() {
                             let x_pos =
                                 helper.offsets.x_axis_start + label_index as f64 * label_spacing;
                             let y_pos = helper.offsets.y_axis_end + x_axis.ticks_length;
@@ -110,8 +75,8 @@ impl<'a> AppendPrimitives<'a> for Cartesian {
                     }
                     // X-Axis labels
                     if x_axis.labels_show {
-                        for (label_index, label) in x_items.iter().enumerate() {
-                            let label_spacing = helper.offsets.x_span / x_items.len() as f64;
+                        for (label_index, label) in x_axis.data.iter().enumerate() {
+                            let label_spacing = helper.offsets.x_span / x_axis.data.len() as f64;
                             let x_pos = helper.offsets.x_axis_start
                                 + (label_index as f64 + 0.5) * label_spacing;
                             let y_pos = helper.offsets.y_axis_end + x_axis.labels_margin;
@@ -199,7 +164,7 @@ impl<'a> AppendPrimitives<'a> for Cartesian {
                                     helper.offsets.y_axis_end
                                         - (percentage_height * helper.offsets.y_span)
                                 };
-                                let x_spacing = helper.offsets.x_span / x_items.len() as f64;
+                                let x_spacing = helper.offsets.x_span / x_axis.data.len() as f64;
                                 let x_pos =
                                     helper.offsets.x_axis_start + (index as f64 + 0.5) * x_spacing;
                                 path.coords.push(Point::new(x_pos, y_pos));
@@ -208,13 +173,9 @@ impl<'a> AppendPrimitives<'a> for Cartesian {
                         }
                     }
                 }
-                (CartesianAxis::Values, CartesianAxis::Category(_y_items)) => {
-                    todo!()
-                }
-                (CartesianAxis::Values, CartesianAxis::Values) => {
-                    todo!()
-                }
             }
-        }
+            (CartesianAxis::Value(x_axis), CartesianAxis::Category(y_axis)) => todo!(),
+            (CartesianAxis::Value(x_axis), CartesianAxis::Value(y_axis)) => todo!(),
+        };
     }
 }

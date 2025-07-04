@@ -5,56 +5,31 @@ use peniko::{Brush, Color};
 
 #[derive(Debug, Clone)]
 pub enum CartesianAxis {
-    Category(Vec<String>),
-    Values,
+    Category(Vec<CategoryAxis>),
+    Value(Vec<ValueAxis>),
 }
 
-#[derive(Debug, Clone)]
-pub enum XAxes {
-    Single(XAxis),
-    Multiple(Vec<XAxis>),
-}
-
-impl From<Vec<XAxis>> for XAxes {
-    fn from(value: Vec<XAxis>) -> Self {
-        XAxes::Multiple(value)
+impl From<CategoryAxis> for CartesianAxis {
+    fn from(value: CategoryAxis) -> Self {
+        Self::Category(vec![value])
     }
 }
 
-impl From<XAxis> for XAxes {
-    fn from(value: XAxis) -> Self {
-        Self::Single(value)
-    }
-}
-
-#[derive(Debug, Clone)]
-pub enum YAxes {
-    Single(YAxis),
-    Multiple(Vec<YAxis>),
-}
-
-impl From<Vec<YAxis>> for YAxes {
-    fn from(value: Vec<YAxis>) -> Self {
-        YAxes::Multiple(value)
-    }
-}
-
-impl From<YAxis> for YAxes {
-    fn from(value: YAxis) -> Self {
-        Self::Single(value)
+impl From<ValueAxis> for CartesianAxis {
+    fn from(value: ValueAxis) -> Self {
+        Self::Value(vec![value])
     }
 }
 
 #[derive(Debug, Builder, Clone)]
-pub struct XAxis {
+pub struct CategoryAxis {
     #[builder(default = true, setters(option_fn(vis = "")))]
     pub axis_show: bool,
     #[builder(default = Stroke::new(1.0))]
     pub axis_stroke: Stroke,
     #[builder(default = Brush::Solid(Color::from_rgba8(0x6e, 0x70, 0x79, 0xff)))]
     pub axis_color: Brush,
-    #[builder(name = axis_position)]
-    pub axis_position: Option<XAxisPosition>,
+    pub axis_position: Option<AxisPosition>,
     #[builder(default = true)]
     pub ticks_show: bool,
     #[builder(default = 5.0)]
@@ -75,20 +50,21 @@ pub struct XAxis {
     pub labels_margin: f64,
     #[builder(default = Brush::Solid(Color::from_rgba8(0x6e, 0x70, 0x79, 0xff)))]
     pub labels_color: Brush,
-    #[builder(default = Alignment::Middle)]
-    pub labels_alignment: Alignment,
-    pub axis_type: CartesianAxis,
+    // #[builder(default = Alignment::Middle)]
+    pub labels_alignment: Option<Alignment>,
+    #[builder(into)]
+    pub data: Vec<String>,
 }
 
 #[derive(Debug, Builder, Clone)]
-pub struct YAxis {
+pub struct ValueAxis {
     #[builder(default = false)]
     pub axis_show: bool,
     #[builder(default = Stroke::new(1.0))]
     pub axis_stroke: Stroke,
     #[builder(default = Brush::Solid(Color::from_rgba8(0x6e, 0x70, 0x79, 0xff)))]
     pub axis_color: Brush,
-    pub axis_position: Option<YAxisPosition>,
+    pub axis_position: Option<AxisPosition>,
     #[builder(default = true)]
     pub ticks_show: bool,
     #[builder(default = 5.0)]
@@ -109,19 +85,18 @@ pub struct YAxis {
     pub labels_margin: f64,
     #[builder(default = Brush::Solid(Color::from_rgba8(0x6e, 0x70, 0x79, 0xff)))]
     pub labels_color: Brush,
-    #[builder(default = Alignment::Middle)]
-    pub labels_alignment: Alignment,
-    pub axis_type: CartesianAxis,
+    // #[builder(default = Alignment::End)]
+    pub labels_alignment: Option<Alignment>,
 }
 
 #[derive(Debug, Clone)]
-pub enum XAxisPosition {
-    Bottom,
-    Top,
+pub enum AxisPosition {
+    Start,
+    End,
 }
 
 #[derive(Debug, Clone)]
-pub enum YAxisPosition {
-    Left,
-    Right,
+pub(crate) enum AxisType {
+    Start,
+    End,
 }

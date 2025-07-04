@@ -56,7 +56,7 @@ pub use bon;
 mod tests {
     use crate::{
         chart::Chart,
-        component::{CartesianAxis, XAxis, YAxis},
+        component::{CategoryAxis, ValueAxis},
         coordinate_system::{Cartesian, CoordinateSystem},
         element::PlotSize,
         renderer::SvgRenderer,
@@ -73,19 +73,12 @@ mod tests {
             })
             .coordinate_system(CoordinateSystem::Cartesian(
                 Cartesian::builder()
-                    .x_axis(vec![
-                        XAxis::builder()
-                            .axis_type(CartesianAxis::Category(bon::vec![
-                                "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun",
-                            ]))
+                    .x_axis(
+                        CategoryAxis::builder()
+                            .data(bon::vec!["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"])
                             .build(),
-                        XAxis::builder()
-                            .axis_type(CartesianAxis::Category(bon::vec![
-                                "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun",
-                            ]))
-                            .build(),
-                    ])
-                    .y_axis(YAxis::builder().axis_type(CartesianAxis::Values).build())
+                    )
+                    .y_axis(ValueAxis::builder().build())
                     .add_series(
                         Line::builder()
                             .data(vec![150.0, 230.0, 224.0, 218.0, 135.0, 147.0, 260.0])
