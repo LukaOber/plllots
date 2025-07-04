@@ -1,8 +1,8 @@
 use crate::chart::Chart;
-use kurbo::{Affine, BezPath, Line, Rect, Stroke};
+use kurbo::{Affine, BezPath, Line, Rect};
 use parley::{Alignment, AlignmentOptions};
 use parley::{FontContext, LayoutContext, PositionedLayoutItem, style::StyleProperty};
-use peniko::{Brush, Color, Fill};
+use peniko::{Brush, Fill};
 use vello::Scene;
 
 pub struct VelloRenderer {
@@ -28,7 +28,7 @@ impl VelloRenderer {
         scene.fill(
             Fill::NonZero,
             Affine::IDENTITY,
-            &Brush::Solid(Color::WHITE),
+            &Brush::Solid(chart.theme.background),
             None,
             &Rect::new(0.0, 0.0, chart.size.width, chart.size.height),
         );
@@ -62,7 +62,7 @@ impl AppendVello for crate::primitives::Text<'_> {
             vello_render
                 .layout_cx
                 .ranged_builder(&mut vello_render.font_cx, &self.text, 1.0);
-        layout_builder.push_default(StyleProperty::FontSize(12.0));
+        layout_builder.push_default(StyleProperty::FontSize(self.font_size as f32));
         let mut layout = layout_builder.build(&self.text);
         layout.break_all_lines(None);
         layout.align(None, self.text_anchor, AlignmentOptions::default());
@@ -143,9 +143,9 @@ impl AppendVello for crate::primitives::Path<'_> {
         }
 
         scene.stroke(
-            &Stroke::new(2.0),
+            self.stroke,
             Affine::IDENTITY,
-            &Brush::Solid(Color::from_rgb8(84, 112, 198)),
+            self.stroke_color,
             None,
             &path,
         );

@@ -87,9 +87,9 @@ mod tests {
             ))
             .build();
 
-        println!("{:?}", instant.elapsed());
         let renderer = SvgRenderer::new();
         renderer.save(&chart, "line.svg").unwrap();
+        println!("{:?}", instant.elapsed());
         panic!()
     }
 }
