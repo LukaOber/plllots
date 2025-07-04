@@ -417,8 +417,8 @@ impl<'a> ValueAxis {
                     }
                 };
                 let line = crate::primitives::Line {
-                    stroke: &self.ticks_stroke,
-                    stroke_color: &self.ticks_color,
+                    stroke: &self.split_line_stroke,
+                    stroke_color: &self.split_lines_color,
                     coords: (start_point, end_point),
                 };
                 primitives.push(crate::primitives::Primitives::Line(line));

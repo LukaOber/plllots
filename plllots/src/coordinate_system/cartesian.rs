@@ -38,7 +38,7 @@ impl<'a> AppendPrimitives<'a> for Cartesian {
         primitives: &mut Vec<crate::primitives::Primitives<'a>>,
         helper: &mut crate::chart::ChartHelper,
     ) {
-        append_axes(&self.x_axis, &self.y_axis, primitives, helper);
+        append_axes(&self.x_axis, &self.y_axis, &self.series, primitives, helper);
         match (&self.x_axis, &self.y_axis) {
             (CartesianAxis::Category(x_axes), CartesianAxis::Category(y_axes)) => todo!(),
             (CartesianAxis::Category(x_axes), CartesianAxis::Value(y_axes)) => {
@@ -189,6 +189,7 @@ impl<'a> AppendPrimitives<'a> for Cartesian {
 fn append_axes<'a>(
     x_axes: &'a CartesianAxis,
     y_axes: &'a CartesianAxis,
+    series: &'a Vec<Series>,
     primitives: &mut Vec<crate::primitives::Primitives<'a>>,
     helper: &ChartHelper,
 ) {
@@ -200,31 +201,39 @@ fn append_axes<'a>(
                 x_axis.draw_axis_ticks(x_axis_index, &AxisType::XAxis, primitives, helper);
                 for (y_axis_index, y_axis) in y_axes.iter().enumerate() {
                     y_axis.draw_axis_line(y_axis_index, &AxisType::YAxis, primitives, helper);
+                    let mut filtered_series = series.into_iter().filter(|s| {
+                        x_axis_index == s.x_axis_index() && y_axis_index == s.y_axis_index()
+                    });
+                    let (min, max, step_size) = match filtered_series.next() {
+                        Some(s) => s.calculate_axis_ticks(),
+                        None => todo!(),
+                    };
+
                     y_axis.draw_axis_ticks(
                         y_axis_index,
                         &AxisType::YAxis,
                         primitives,
                         helper,
-                        -200.0,
-                        300.0,
-                        100.0,
+                        min,
+                        max,
+                        step_size,
                     );
                     y_axis.draw_split_lines(
                         &AxisType::YAxis,
                         primitives,
                         helper,
-                        -200.0,
-                        300.0,
-                        100.0,
+                        min,
+                        max,
+                        step_size,
                     );
                     y_axis.draw_labels(
                         y_axis_index,
                         &AxisType::YAxis,
                         primitives,
                         helper,
-                        -200.0,
-                        300.0,
-                        100.0,
+                        min,
+                        max,
+                        step_size,
                     );
                 }
             }

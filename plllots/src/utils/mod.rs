@@ -13,8 +13,8 @@ fn get_scale_details(min_val: f64, max_val: f64) -> (f64, f64, f64) {
 
     let range_val = max_val - min_val;
 
-    let step_count = 7;
-    let rough_step = range_val / (step_count as f64 - 1.0);
+    let step_count = 6;
+    let rough_step = range_val / (step_count as f64);
 
     let good_normalized_steps = [1.0, 1.5, 2.0, 3.0, 5.0, 7.5, 10.0]; // keep the 10 at the end
 
