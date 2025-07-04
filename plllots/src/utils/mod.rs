@@ -62,14 +62,12 @@ mod tests {
 
     #[test]
     fn basic3() {
-        let data = [
-            200.0, 560.0, 750.0, 580.0, 250.0, 300.0, 450.0, 300.0, 100.0,
-        ];
+        let data = [200.0, 560.0, 750.0, 580.0, 300.0, -250.0, 450.0];
         let (min, max) = get_raw_range(&data);
         let (min, max, step) = get_scale_details(min, max);
-        assert_eq!(min, 0.0);
-        assert_eq!(max, 900.0);
-        assert_eq!(step, 150.0);
+        assert_eq!(min, -400.0);
+        assert_eq!(max, 800.0);
+        assert_eq!(step, 200.0);
     }
 
     #[test]

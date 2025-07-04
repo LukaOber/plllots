@@ -6,6 +6,7 @@ use bon::Builder;
 
 #[derive(Debug, Clone, Builder)]
 pub struct Chart {
+    #[builder(with = |width: f64, height: f64| PlotSize { width, height })]
     pub size: PlotSize,
     #[builder(default)]
     pub margins: Margins,

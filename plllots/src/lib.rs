@@ -58,7 +58,6 @@ mod tests {
         chart::Chart,
         component::{CategoryAxis, ValueAxis},
         coordinate_system::{Cartesian, CoordinateSystem},
-        element::PlotSize,
         renderer::SvgRenderer,
         series::Line,
     };
@@ -67,18 +66,15 @@ mod tests {
     fn it_works() {
         let instant = std::time::Instant::now();
         let chart = Chart::builder()
-            .size(PlotSize {
-                width: 1000.0,
-                height: 1000.0,
-            })
+            .size(1000.0, 1000.0)
             .coordinate_system(CoordinateSystem::Cartesian(
                 Cartesian::builder()
-                    .y_axis(
+                    .x_axis(
                         CategoryAxis::builder()
                             .data(bon::vec!["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"])
                             .build(),
                     )
-                    .x_axis(vec![ValueAxis::builder().build()])
+                    .y_axis(vec![ValueAxis::builder().build()])
                     .set_series(vec![
                         Line::builder()
                             .data(vec![150.0, 230.0, 224.0, 218.0, 135.0, 147.0, 260.0])
