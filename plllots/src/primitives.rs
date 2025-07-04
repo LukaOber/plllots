@@ -2,7 +2,10 @@ use kurbo::{Point, Stroke};
 use parley::Alignment;
 use peniko::Brush;
 
-use crate::renderer::{AppendSvg, AppendVello};
+use crate::{
+    chart::Theme,
+    renderer::{AppendSvg, AppendVello},
+};
 
 #[derive(Debug, Clone)]
 pub enum Primitives<'a> {
@@ -40,6 +43,7 @@ pub trait AppendPrimitives<'a> {
         &'a self,
         primitives: &mut Vec<Primitives<'a>>,
         helper: &mut crate::chart::ChartHelper,
+        theme: &'a Theme,
     );
 }
 

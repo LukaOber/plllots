@@ -2,7 +2,7 @@ pub mod cartesian;
 
 pub use cartesian::*;
 
-use crate::primitives::AppendPrimitives;
+use crate::{chart::Theme, primitives::AppendPrimitives};
 
 #[derive(Debug, Clone)]
 pub enum CoordinateSystem {
@@ -14,10 +14,11 @@ impl<'a> AppendPrimitives<'a> for CoordinateSystem {
         &'a self,
         primitives: &mut Vec<crate::primitives::Primitives<'a>>,
         helper: &mut crate::chart::ChartHelper,
+        theme: &'a Theme,
     ) {
         match self {
             CoordinateSystem::Cartesian(cartesian) => {
-                cartesian.append_primitives(primitives, helper);
+                cartesian.append_primitives(primitives, helper, theme);
             }
         }
     }

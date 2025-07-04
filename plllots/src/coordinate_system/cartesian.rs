@@ -2,6 +2,7 @@ use bon::Builder;
 use kurbo::Point;
 
 use crate::{
+    chart::Theme,
     component::{AxisType, CartesianAxis},
     primitives::AppendPrimitives,
     series::Series,
@@ -35,14 +36,21 @@ impl<'a> AppendPrimitives<'a> for Cartesian {
         &'a self,
         primitives: &mut Vec<crate::primitives::Primitives<'a>>,
         helper: &mut crate::chart::ChartHelper,
+        theme: &'a Theme,
     ) {
         match (&self.x_axis, &self.y_axis) {
             (CartesianAxis::Category(_x_axes), CartesianAxis::Category(_y_axes)) => todo!(),
             (CartesianAxis::Category(x_axes), CartesianAxis::Value(y_axes)) => {
                 for (x_axis_index, x_axis) in x_axes.iter().enumerate() {
-                    x_axis.draw_split_lines(&AxisType::XAxis, primitives, helper);
-                    x_axis.draw_axis_ticks(x_axis_index, &AxisType::XAxis, primitives, helper);
-                    x_axis.draw_labels(x_axis_index, &AxisType::XAxis, primitives, helper);
+                    x_axis.draw_split_lines(&AxisType::XAxis, primitives, helper, theme);
+                    x_axis.draw_axis_ticks(
+                        x_axis_index,
+                        &AxisType::XAxis,
+                        primitives,
+                        helper,
+                        theme,
+                    );
+                    x_axis.draw_labels(x_axis_index, &AxisType::XAxis, primitives, helper, theme);
                     for (y_axis_index, y_axis) in y_axes.iter().enumerate() {
                         let mut filtered_series = self.series.iter().filter(|s| {
                             x_axis_index == s.x_axis_index() && y_axis_index == s.y_axis_index()
@@ -64,6 +72,7 @@ impl<'a> AppendPrimitives<'a> for Cartesian {
                             &AxisType::YAxis,
                             primitives,
                             helper,
+                            theme,
                             min,
                             max,
                             step_size,
@@ -73,6 +82,7 @@ impl<'a> AppendPrimitives<'a> for Cartesian {
                             &AxisType::YAxis,
                             primitives,
                             helper,
+                            theme,
                             min,
                             max,
                             step_size,
@@ -82,11 +92,18 @@ impl<'a> AppendPrimitives<'a> for Cartesian {
                             &AxisType::YAxis,
                             primitives,
                             helper,
+                            theme,
                             min,
                             max,
                             step_size,
                         );
-                        y_axis.draw_axis_line(y_axis_index, &AxisType::YAxis, primitives, helper);
+                        y_axis.draw_axis_line(
+                            y_axis_index,
+                            &AxisType::YAxis,
+                            primitives,
+                            helper,
+                            theme,
+                        );
                         self.series
                             .iter()
                             .filter(|s| {
@@ -115,14 +132,26 @@ impl<'a> AppendPrimitives<'a> for Cartesian {
                                 }
                             });
                     }
-                    x_axis.draw_axis_line(x_axis_index, &AxisType::XAxis, primitives, helper);
+                    x_axis.draw_axis_line(
+                        x_axis_index,
+                        &AxisType::XAxis,
+                        primitives,
+                        helper,
+                        theme,
+                    );
                 }
             }
             (CartesianAxis::Value(x_axes), CartesianAxis::Category(y_axes)) => {
                 for (y_axis_index, y_axis) in y_axes.iter().enumerate() {
-                    y_axis.draw_split_lines(&AxisType::YAxis, primitives, helper);
-                    y_axis.draw_axis_ticks(y_axis_index, &AxisType::YAxis, primitives, helper);
-                    y_axis.draw_labels(y_axis_index, &AxisType::YAxis, primitives, helper);
+                    y_axis.draw_split_lines(&AxisType::YAxis, primitives, helper, theme);
+                    y_axis.draw_axis_ticks(
+                        y_axis_index,
+                        &AxisType::YAxis,
+                        primitives,
+                        helper,
+                        theme,
+                    );
+                    y_axis.draw_labels(y_axis_index, &AxisType::YAxis, primitives, helper, theme);
                     for (x_axis_index, x_axis) in x_axes.iter().enumerate() {
                         let mut filtered_series = self.series.iter().filter(|s| {
                             y_axis_index == s.x_axis_index() && x_axis_index == s.y_axis_index()
@@ -144,6 +173,7 @@ impl<'a> AppendPrimitives<'a> for Cartesian {
                             &AxisType::XAxis,
                             primitives,
                             helper,
+                            theme,
                             min,
                             max,
                             step_size,
@@ -153,6 +183,7 @@ impl<'a> AppendPrimitives<'a> for Cartesian {
                             &AxisType::XAxis,
                             primitives,
                             helper,
+                            theme,
                             min,
                             max,
                             step_size,
@@ -162,11 +193,18 @@ impl<'a> AppendPrimitives<'a> for Cartesian {
                             &AxisType::XAxis,
                             primitives,
                             helper,
+                            theme,
                             min,
                             max,
                             step_size,
                         );
-                        x_axis.draw_axis_line(x_axis_index, &AxisType::XAxis, primitives, helper);
+                        x_axis.draw_axis_line(
+                            x_axis_index,
+                            &AxisType::XAxis,
+                            primitives,
+                            helper,
+                            theme,
+                        );
                         self.series
                             .iter()
                             .filter(|s| {
@@ -195,7 +233,13 @@ impl<'a> AppendPrimitives<'a> for Cartesian {
                                 }
                             });
                     }
-                    y_axis.draw_axis_line(y_axis_index, &AxisType::YAxis, primitives, helper);
+                    y_axis.draw_axis_line(
+                        y_axis_index,
+                        &AxisType::YAxis,
+                        primitives,
+                        helper,
+                        theme,
+                    );
                 }
             }
             (CartesianAxis::Value(_x_axes), CartesianAxis::Value(_y_axes)) => todo!(),

@@ -16,6 +16,11 @@ impl SvgRenderer {
     }
 
     pub fn render(&self, chart: &Chart) -> Document {
+        let background = chart.theme.background.to_rgba8().to_u8_array();
+        let background = format!(
+            "#{:X}{:X}{:X}{:X}",
+            background[0], background[1], background[2], background[3]
+        );
         let mut doc = Document::new()
             .set("width", chart.size.width)
             .set("height", chart.size.height)
@@ -26,13 +31,11 @@ impl SvgRenderer {
                     .set("height", chart.size.height)
                     .set("x", 0)
                     .set("y", 0)
-                    .set("fill", "none"),
+                    .set("fill", background),
             );
 
-        // Render axes
         let primitives = chart.generate_primitives();
         for primitive in primitives {
-            // println!("{:#?}", primitive);
             primitive.append_svg(&mut doc);
         }
         doc
