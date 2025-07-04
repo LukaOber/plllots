@@ -62,8 +62,8 @@ impl Offsets {
             x_axis_start,
             x_axis_end,
             x_span,
-            y_axis_start,
-            y_axis_end,
+            y_axis_end: y_axis_start,
+            y_axis_start: y_axis_end,
             y_span,
         }
     }

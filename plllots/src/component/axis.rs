@@ -54,11 +54,11 @@ pub struct CategoryAxis {
     #[builder(default = Stroke::new(1.0))]
     pub ticks_stroke: Stroke,
     #[builder(default = false)]
-    pub grid_show: bool,
+    pub split_lines_show: bool,
     #[builder(default = Brush::Solid(Color::from_rgba8(0xe0, 0xe6, 0xe1, 0xff)))]
-    pub grid_color: Brush,
+    pub split_lines_color: Brush,
     #[builder(default = Stroke::new(1.0))]
-    pub grid_stroke: Stroke,
+    pub split_lines_stroke: Stroke,
     #[builder(default = Brush::Solid(Color::from_rgba8(0x6e, 0x70, 0x79, 0xff)))]
     pub ticks_color: Brush,
     #[builder(default = true)]
@@ -67,9 +67,9 @@ pub struct CategoryAxis {
     pub labels_margin: f64,
     #[builder(default = Brush::Solid(Color::from_rgba8(0x6e, 0x70, 0x79, 0xff)))]
     pub labels_color: Brush,
-    // #[builder(default = Alignment::Middle)]
+    #[builder(default = 12.0)]
+    pub labels_font_size: f64,
     pub labels_alignment: Option<Alignment>,
-    #[builder(into)]
     pub data: Vec<String>,
 }
 
@@ -85,7 +85,7 @@ pub struct ValueAxis {
     pub axis_offset: Option<f64>,
     #[builder(default = 20.0)]
     pub axis_auto_offset: f64,
-    #[builder(default = true)]
+    #[builder(default = false)]
     pub ticks_show: bool,
     #[builder(default = 5.0)]
     pub ticks_length: f64,
@@ -94,18 +94,19 @@ pub struct ValueAxis {
     #[builder(default = Brush::Solid(Color::from_rgba8(0x6e, 0x70, 0x79, 0xff)))]
     pub ticks_color: Brush,
     #[builder(default = true)]
-    pub grid_show: bool,
+    pub split_lines_show: bool,
     #[builder(default = Brush::Solid(Color::from_rgba8(0xe0, 0xe6, 0xe1, 0xff)))]
-    pub grid_color: Brush,
+    pub split_lines_color: Brush,
     #[builder(default = Stroke::new(1.0))]
-    pub grid_stroke: Stroke,
+    pub split_line_stroke: Stroke,
     #[builder(default = true)]
     pub labels_show: bool,
     #[builder(default = 8.0)]
     pub labels_margin: f64,
     #[builder(default = Brush::Solid(Color::from_rgba8(0x6e, 0x70, 0x79, 0xff)))]
     pub labels_color: Brush,
-    // #[builder(default = Alignment::End)]
+    #[builder(default = 12.0)]
+    pub labels_font_size: f64,
     pub labels_alignment: Option<Alignment>,
 }
 
@@ -121,32 +122,166 @@ pub(crate) enum AxisType {
     YAxis,
 }
 
-pub(crate) trait DrawCartesianAxis<'a> {
-    fn draw_axis_line(
-        &'a self,
-        index: usize,
-        axis_type: &AxisType,
-        primitives: &mut Vec<Primitives<'a>>,
-        helper: &ChartHelper,
-    );
-    fn get_position(&self, index: usize) -> &AxisPosition;
-    fn get_offset(&self, index: usize, position: &AxisPosition) -> f64;
-    fn get_axis_stroke(&self) -> &Stroke;
-    fn get_axis_color(&self) -> &Brush;
-    fn get_axis_show(&self) -> bool;
-}
-
-impl<'a> DrawCartesianAxis<'a> for CategoryAxis {
-    fn draw_axis_line(
+impl<'a> CategoryAxis {
+    pub(crate) fn draw_axis_line(
         &'a self,
         index: usize,
         axis_type: &AxisType,
         primitives: &mut Vec<Primitives<'a>>,
         helper: &ChartHelper,
     ) {
-        if self.get_axis_show() {
-            let position = self.get_position(index);
-            let offset = self.get_offset(index, position);
+        if self.axis_show {
+            let position = self.get_axis_position(index);
+            let offset = self.get_axis_offset(index, position);
+
+            let (start_point, end_point) = match axis_type {
+                AxisType::XAxis => match position {
+                    AxisPosition::Start => (
+                        Point::new(
+                            helper.offsets.x_axis_start,
+                            helper.offsets.y_axis_start + offset,
+                        ),
+                        Point::new(
+                            helper.offsets.x_axis_end,
+                            helper.offsets.y_axis_start + offset,
+                        ),
+                    ),
+                    AxisPosition::End => (
+                        Point::new(
+                            helper.offsets.x_axis_start,
+                            helper.offsets.y_axis_end + offset,
+                        ),
+                        Point::new(
+                            helper.offsets.x_axis_end,
+                            helper.offsets.y_axis_end + offset,
+                        ),
+                    ),
+                },
+                AxisType::YAxis => match position {
+                    AxisPosition::Start => (
+                        Point::new(
+                            helper.offsets.x_axis_start + offset,
+                            helper.offsets.y_axis_end,
+                        ),
+                        Point::new(
+                            helper.offsets.x_axis_start + offset,
+                            helper.offsets.y_axis_start,
+                        ),
+                    ),
+                    AxisPosition::End => (
+                        Point::new(
+                            helper.offsets.x_axis_end + offset,
+                            helper.offsets.y_axis_end,
+                        ),
+                        Point::new(
+                            helper.offsets.x_axis_end + offset,
+                            helper.offsets.y_axis_start,
+                        ),
+                    ),
+                },
+            };
+            let line = crate::primitives::Line {
+                stroke: &self.axis_stroke,
+                stroke_color: &self.axis_color,
+                coords: (start_point, end_point),
+            };
+            primitives.push(crate::primitives::Primitives::Line(line));
+        }
+    }
+    pub(crate) fn draw_axis_ticks(
+        &'a self,
+        index: usize,
+        axis_type: &AxisType,
+        primitives: &mut Vec<Primitives<'a>>,
+        helper: &ChartHelper,
+    ) {
+        if self.ticks_show {
+            let position = self.get_axis_position(index);
+            let offset = self.get_axis_offset(index, position);
+
+            let tick_spacing = match axis_type {
+                AxisType::XAxis => helper.offsets.x_span / self.data.len() as f64,
+                AxisType::YAxis => helper.offsets.y_span / self.data.len() as f64,
+            };
+            for tick_index in 0..=self.data.len() {
+                let (start_point, end_point) = match axis_type {
+                    AxisType::XAxis => {
+                        let common_x =
+                            helper.offsets.x_axis_start + tick_index as f64 * tick_spacing;
+                        let (start_y, end_y) = match position {
+                            AxisPosition::Start => (
+                                helper.offsets.y_axis_start + offset,
+                                helper.offsets.y_axis_start + self.ticks_length + offset,
+                            ),
+                            AxisPosition::End => (
+                                helper.offsets.y_axis_end + offset,
+                                helper.offsets.y_axis_end - self.ticks_length + offset,
+                            ),
+                        };
+                        (Point::new(common_x, start_y), Point::new(common_x, end_y))
+                    }
+                    AxisType::YAxis => {
+                        let (start_x, end_x) = match position {
+                            AxisPosition::Start => (
+                                helper.offsets.x_axis_start + offset,
+                                helper.offsets.x_axis_start + offset - self.ticks_length,
+                            ),
+                            AxisPosition::End => (
+                                helper.offsets.x_axis_end + offset,
+                                helper.offsets.x_axis_end + offset + self.ticks_length,
+                            ),
+                        };
+
+                        let common_y =
+                            helper.offsets.y_axis_start - tick_index as f64 * tick_spacing;
+                        (Point::new(start_x, common_y), Point::new(end_x, common_y))
+                    }
+                };
+                let line = crate::primitives::Line {
+                    stroke: &self.ticks_stroke,
+                    stroke_color: &self.ticks_color,
+                    coords: (start_point, end_point),
+                };
+                primitives.push(crate::primitives::Primitives::Line(line));
+            }
+        }
+    }
+
+    fn get_axis_position(&self, index: usize) -> &AxisPosition {
+        self.axis_position.as_ref().unwrap_or_else(|| {
+            if index % 2 == 0 {
+                &AxisPosition::Start
+            } else {
+                &AxisPosition::End
+            }
+        })
+    }
+
+    fn get_axis_offset(&self, index: usize, position: &AxisPosition) -> f64 {
+        match position {
+            AxisPosition::Start => *self
+                .axis_offset
+                .as_ref()
+                .unwrap_or(&((index / 2) as f64 * self.axis_auto_offset)),
+            AxisPosition::End => -*self
+                .axis_offset
+                .as_ref()
+                .unwrap_or(&((index / 2) as f64 * self.axis_auto_offset)),
+        }
+    }
+}
+
+impl<'a> ValueAxis {
+    pub(crate) fn draw_axis_line(
+        &'a self,
+        index: usize,
+        axis_type: &AxisType,
+        primitives: &mut Vec<Primitives<'a>>,
+        helper: &ChartHelper,
+    ) {
+        if self.axis_show {
+            let position = self.get_axis_position(index);
+            let offset = self.get_axis_offset(index, position);
 
             let (start_point, end_point) = match axis_type {
                 AxisType::XAxis => match position {
@@ -195,118 +330,160 @@ impl<'a> DrawCartesianAxis<'a> for CategoryAxis {
                 },
             };
             let line = crate::primitives::Line {
-                stroke: &self.get_axis_stroke(),
-                stroke_color: &self.get_axis_color(),
+                stroke: &self.axis_stroke,
+                stroke_color: &self.axis_color,
                 coords: (start_point, end_point),
             };
             primitives.push(crate::primitives::Primitives::Line(line));
         }
     }
 
-    fn get_position(&self, index: usize) -> &AxisPosition {
-        self.axis_position.as_ref().unwrap_or_else(|| {
-            if index % 2 == 0 {
-                &AxisPosition::Start
-            } else {
-                &AxisPosition::End
-            }
-        })
-    }
-
-    fn get_offset(&self, index: usize, position: &AxisPosition) -> f64 {
-        match position {
-            AxisPosition::Start => *self
-                .axis_offset
-                .as_ref()
-                .unwrap_or(&((index / 2) as f64 * self.axis_auto_offset)),
-            AxisPosition::End => -*self
-                .axis_offset
-                .as_ref()
-                .unwrap_or(&((index / 2) as f64 * self.axis_auto_offset)),
-        }
-    }
-
-    fn get_axis_stroke(&self) -> &Stroke {
-        &self.axis_stroke
-    }
-
-    fn get_axis_color(&self) -> &Brush {
-        &self.axis_color
-    }
-
-    fn get_axis_show(&self) -> bool {
-        self.axis_show
-    }
-}
-
-impl<'a> DrawCartesianAxis<'a> for ValueAxis {
-    fn draw_axis_line(
+    pub(crate) fn draw_axis_ticks(
         &'a self,
         index: usize,
         axis_type: &AxisType,
         primitives: &mut Vec<Primitives<'a>>,
         helper: &ChartHelper,
+        min: f64,
+        max: f64,
+        step_size: f64,
     ) {
-        if self.get_axis_show() {
-            let position = self.get_position(index);
-            let offset = self.get_offset(index, position);
+        if self.ticks_show {
+            let position = self.get_axis_position(index);
+            let offset = self.get_axis_offset(index, position);
 
-            let (start_point, end_point) = match axis_type {
-                AxisType::XAxis => match position {
-                    AxisPosition::Start => (
-                        Point::new(
-                            helper.offsets.x_axis_start,
-                            helper.offsets.y_axis_end + offset,
-                        ),
-                        Point::new(
-                            helper.offsets.x_axis_end,
-                            helper.offsets.y_axis_end + offset,
-                        ),
-                    ),
-                    AxisPosition::End => (
-                        Point::new(
-                            helper.offsets.x_axis_start,
-                            helper.offsets.y_axis_start + offset,
-                        ),
-                        Point::new(
-                            helper.offsets.x_axis_end,
-                            helper.offsets.y_axis_start + offset,
-                        ),
-                    ),
-                },
-                AxisType::YAxis => match position {
-                    AxisPosition::Start => (
-                        Point::new(
-                            helper.offsets.x_axis_start + offset,
-                            helper.offsets.y_axis_start,
-                        ),
-                        Point::new(
-                            helper.offsets.x_axis_start + offset,
-                            helper.offsets.y_axis_end,
-                        ),
-                    ),
-                    AxisPosition::End => (
-                        Point::new(
-                            helper.offsets.x_axis_end + offset,
-                            helper.offsets.y_axis_start,
-                        ),
-                        Point::new(
-                            helper.offsets.x_axis_end + offset,
-                            helper.offsets.y_axis_end,
-                        ),
-                    ),
-                },
+            let tick_spacing = match axis_type {
+                AxisType::XAxis => helper.offsets.x_span / ((max - min) / step_size),
+                AxisType::YAxis => helper.offsets.y_span / ((max - min) / step_size),
             };
-            let line = crate::primitives::Line {
-                stroke: &self.get_axis_stroke(),
-                stroke_color: &self.get_axis_color(),
-                coords: (start_point, end_point),
-            };
-            primitives.push(crate::primitives::Primitives::Line(line));
+            for tick_index in 0..(((max - min) / step_size) as i32 + 1) {
+                let (start_point, end_point) = match axis_type {
+                    AxisType::XAxis => {
+                        todo!()
+                    }
+                    AxisType::YAxis => {
+                        let (start_x, end_x) = match position {
+                            AxisPosition::Start => (
+                                helper.offsets.x_axis_start + offset,
+                                helper.offsets.x_axis_start + offset - self.ticks_length,
+                            ),
+                            AxisPosition::End => (
+                                helper.offsets.x_axis_end + offset,
+                                helper.offsets.x_axis_end + offset + self.ticks_length,
+                            ),
+                        };
+
+                        let common_y =
+                            helper.offsets.y_axis_start - (tick_index as f64 * tick_spacing);
+                        (Point::new(start_x, common_y), Point::new(end_x, common_y))
+                    }
+                };
+                let line = crate::primitives::Line {
+                    stroke: &self.ticks_stroke,
+                    stroke_color: &self.ticks_color,
+                    coords: (start_point, end_point),
+                };
+                primitives.push(crate::primitives::Primitives::Line(line));
+            }
         }
     }
 
-    fn get_position(&self, index: usize) -> &AxisPosition {
+    pub(crate) fn draw_split_lines(
+        &'a self,
+        axis_type: &AxisType,
+        primitives: &mut Vec<Primitives<'a>>,
+        helper: &ChartHelper,
+        min: f64,
+        max: f64,
+        step_size: f64,
+    ) {
+        if self.split_lines_show {
+            let tick_spacing = match axis_type {
+                AxisType::XAxis => helper.offsets.x_span / ((max - min) / step_size),
+                AxisType::YAxis => helper.offsets.y_span / ((max - min) / step_size),
+            };
+            for tick_index in 0..(((max - min) / step_size) as i32 + 1) {
+                let (start_point, end_point) = match axis_type {
+                    AxisType::XAxis => {
+                        todo!()
+                    }
+                    AxisType::YAxis => {
+                        let (start_x, end_x) =
+                            (helper.offsets.x_axis_start, helper.offsets.x_axis_end);
+
+                        let common_y =
+                            helper.offsets.y_axis_start - (tick_index as f64 * tick_spacing);
+                        (Point::new(start_x, common_y), Point::new(end_x, common_y))
+                    }
+                };
+                let line = crate::primitives::Line {
+                    stroke: &self.ticks_stroke,
+                    stroke_color: &self.ticks_color,
+                    coords: (start_point, end_point),
+                };
+                primitives.push(crate::primitives::Primitives::Line(line));
+            }
+        }
+    }
+
+    pub(crate) fn draw_labels(
+        &'a self,
+        index: usize,
+        axis_type: &AxisType,
+        primitives: &mut Vec<Primitives<'a>>,
+        helper: &ChartHelper,
+        min: f64,
+        max: f64,
+        step_size: f64,
+    ) {
+        if self.labels_show {
+            let position = self.get_axis_position(index);
+            let offset = self.get_axis_offset(index, position);
+
+            let tick_spacing = match axis_type {
+                AxisType::XAxis => helper.offsets.x_span / ((max - min) / step_size),
+                AxisType::YAxis => helper.offsets.y_span / ((max - min) / step_size),
+            };
+            for tick_index in 0..(((max - min) / step_size) as i32 + 1) {
+                let point = match axis_type {
+                    AxisType::XAxis => {
+                        todo!()
+                    }
+                    AxisType::YAxis => {
+                        let pos_x = match position {
+                            AxisPosition::Start => {
+                                helper.offsets.x_axis_start - self.labels_margin + offset
+                            }
+                            AxisPosition::End => {
+                                helper.offsets.x_axis_end + self.labels_margin + offset
+                            }
+                        };
+                        let pos_y =
+                            helper.offsets.y_axis_start - (tick_index as f64 * tick_spacing);
+                        Point::new(pos_x, pos_y)
+                    }
+                };
+                let text_anchor = self.labels_alignment.unwrap_or(match axis_type {
+                    AxisType::XAxis => Alignment::Middle,
+                    AxisType::YAxis => match position {
+                        AxisPosition::Start => Alignment::End,
+                        AxisPosition::End => Alignment::Start,
+                    },
+                });
+
+                let text = crate::primitives::Text {
+                    text: format!("{}", min + step_size * tick_index as f64),
+                    fill_color: &self.labels_color,
+                    font_size: self.labels_font_size,
+                    text_anchor,
+                    coord: point,
+                };
+                primitives.push(crate::primitives::Primitives::Text(text));
+            }
+        }
+    }
+
+    fn get_axis_position(&self, index: usize) -> &AxisPosition {
         self.axis_position.as_ref().unwrap_or_else(|| {
             if index % 2 == 0 {
                 &AxisPosition::Start
@@ -316,7 +493,7 @@ impl<'a> DrawCartesianAxis<'a> for ValueAxis {
         })
     }
 
-    fn get_offset(&self, index: usize, position: &AxisPosition) -> f64 {
+    fn get_axis_offset(&self, index: usize, position: &AxisPosition) -> f64 {
         match position {
             AxisPosition::Start => *self
                 .axis_offset
@@ -327,17 +504,5 @@ impl<'a> DrawCartesianAxis<'a> for ValueAxis {
                 .as_ref()
                 .unwrap_or(&((index / 2) as f64 * self.axis_auto_offset)),
         }
-    }
-
-    fn get_axis_stroke(&self) -> &Stroke {
-        &self.axis_stroke
-    }
-
-    fn get_axis_color(&self) -> &Brush {
-        &self.axis_color
-    }
-
-    fn get_axis_show(&self) -> bool {
-        self.axis_show
     }
 }

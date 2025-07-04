@@ -9,4 +9,8 @@ pub struct Line {
     #[builder(default = Brush::Solid(Color::from_rgba8(0x54, 0x70, 0xd6, 0xff)))]
     pub color: Brush,
     pub data: Vec<f64>,
+    #[builder(default = 0)]
+    pub x_axis_index: usize,
+    #[builder(default = 0)]
+    pub y_axis_index: usize,
 }
