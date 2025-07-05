@@ -1,8 +1,9 @@
 use crate::chart::Chart;
-use kurbo::{Affine, BezPath, Circle, Line, Point, Rect, Shape};
+use crate::element::Offsets;
+use kurbo::{Affine, BezPath, Circle, Line, Point, Rect, Shape, Stroke};
 use parley::{Alignment, AlignmentOptions};
 use parley::{FontContext, LayoutContext, PositionedLayoutItem, style::StyleProperty};
-use peniko::{Brush, Fill};
+use peniko::{Brush, Color, Fill};
 use vello::Scene;
 
 pub struct VelloRenderer {
@@ -24,7 +25,12 @@ impl VelloRenderer {
         }
     }
 
-    pub fn render_to_scene(&mut self, chart: &Chart, scene: &mut Scene) {
+    pub fn render_to_scene(
+        &mut self,
+        chart: &Chart,
+        scene: &mut Scene,
+        mouse_position: Option<Point>,
+    ) {
         scene.fill(
             Fill::NonZero,
             Affine::IDENTITY,
@@ -36,6 +42,34 @@ impl VelloRenderer {
         let primitives = chart.generate_primitives();
         for primitive in primitives {
             primitive.append_vello(scene, self);
+        }
+
+        if let Some(p) = mouse_position {
+            let offsets = Offsets::from_margin(&chart.size, &chart.margins);
+            if offsets.x_axis_start <= p.x
+                && p.x <= offsets.x_axis_end
+                && offsets.y_axis_start >= p.y
+                && p.y >= offsets.y_axis_end
+            {
+                let dash_size = offsets.x_span / 85.0;
+                let brush = Brush::Solid(Color::from_rgba8(0xcc, 0xcc, 0xcc, 0xff));
+
+                let x_stroke = Stroke::new(1.0).with_dashes(0.0, [dash_size]);
+                let x_line = Line::new(
+                    Point::new(offsets.x_axis_start, p.y),
+                    Point::new(offsets.x_axis_end, p.y),
+                );
+
+                let dash_size = offsets.y_span / 85.0;
+                let y_stroke = Stroke::new(1.0).with_dashes(0.0, [dash_size]);
+                let y_line = Line::new(
+                    Point::new(p.x, offsets.y_axis_start),
+                    Point::new(p.x, offsets.y_axis_end),
+                );
+
+                scene.stroke(&x_stroke, Affine::IDENTITY, &brush, None, &x_line);
+                scene.stroke(&y_stroke, Affine::IDENTITY, &brush, None, &y_line);
+            }
         }
     }
 }

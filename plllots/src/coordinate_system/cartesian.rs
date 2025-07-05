@@ -267,11 +267,6 @@ impl<'a> AppendPrimitives<'a> for Cartesian {
                                             .len(),
                                         ),
                                     };
-                                    let mut symbols = Vec::with_capacity(
-                                        line.data.data[line.data.primary_data_index.unwrap_or(0)]
-                                            .len(),
-                                    );
-
                                     for (y_item, x_item) in line.data.data
                                         [line.data.primary_data_index.unwrap_or(0)]
                                     .iter()
@@ -320,9 +315,6 @@ impl<'a> AppendPrimitives<'a> for Cartesian {
                                         primitives.push(circle);
                                     }
                                     primitives.push(crate::primitives::Primitives::Path(path));
-                                    for symbol in symbols {
-                                        primitives.push(symbol);
-                                    }
                                 }
                             });
                     }
