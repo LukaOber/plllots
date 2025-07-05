@@ -76,7 +76,10 @@ pub struct CategoryAxis {
     pub labels_color: Option<Brush>,
     #[builder(setters(option_fn(vis = "")))]
     pub labels_font_size: Option<f64>,
+    #[builder(setters(option_fn(vis = "")))]
     pub labels_alignment: Option<Alignment>,
+    #[builder(setters(option_fn(vis = "")))]
+    pub labels_rotation: Option<f64>,
     pub data: Vec<String>,
 }
 
@@ -116,7 +119,10 @@ pub struct ValueAxis {
     pub labels_color: Option<Brush>,
     #[builder(setters(option_fn(vis = "")))]
     pub labels_font_size: Option<f64>,
+    #[builder(setters(option_fn(vis = "")))]
     pub labels_alignment: Option<Alignment>,
+    #[builder(setters(option_fn(vis = "")))]
+    pub labels_rotation: Option<f64>,
 }
 
 #[derive(Debug, Clone)]
@@ -398,6 +404,7 @@ impl<'a> CategoryAxis {
                         .unwrap_or(theme.cartesian_category_axis.labels_font_size),
                     text_anchor,
                     coord: point,
+                    rotation: self.labels_rotation,
                 };
                 primitives.push(crate::primitives::Primitives::Text(text));
             }
@@ -708,6 +715,7 @@ impl<'a> ValueAxis {
                         .unwrap_or(theme.cartesian_value_axis.labels_font_size),
                     text_anchor,
                     coord: point,
+                    rotation: self.labels_rotation,
                 };
                 primitives.push(crate::primitives::Primitives::Text(text));
             }

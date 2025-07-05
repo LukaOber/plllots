@@ -2,7 +2,7 @@ use kurbo::Cap;
 use parley::Alignment;
 use peniko::Brush;
 use svg::node::element::path::Data;
-use svg::node::element::{Path, Rectangle};
+use svg::node::element::{Circle, Path, Rectangle};
 use svg::{Document, Node};
 
 use crate::chart::Chart;
@@ -122,6 +122,18 @@ impl AppendSvg for crate::primitives::Text<'_> {
         };
 
         let style = format!("font-size:{}px;font-family:sans-serif", self.font_size);
+        let transform = match self.rotation {
+            Some(r) => format!(
+                "matrix({}, {}, {}, {}, {}, {})",
+                r.cos(),
+                r.sin(),
+                -r.sin(),
+                r.cos(),
+                self.coord.x,
+                self.coord.y
+            ),
+            None => format!("translate({} {})", self.coord.x, self.coord.y),
+        };
 
         doc.append(
             svg::node::element::Text::new(&self.text)
@@ -129,10 +141,7 @@ impl AppendSvg for crate::primitives::Text<'_> {
                 .set("text-anchor", text_anchor)
                 .set("style", style)
                 .set("fill", fill_color)
-                .set(
-                    "transform",
-                    format!("translate({} {})", self.coord.x, self.coord.y),
-                ),
+                .set("transform", transform),
         );
     }
 }
@@ -167,5 +176,43 @@ impl AppendSvg for crate::primitives::Path<'_> {
                 .set("fill", "transparent")
                 .set("d", path),
         );
+    }
+}
+
+impl AppendSvg for crate::primitives::Circle<'_> {
+    fn append_svg(&self, doc: &mut Document) {
+        let stroke_color = match &self.stroke_color {
+            Brush::Solid(alpha_color) => {
+                let colors = alpha_color.to_rgba8().to_u8_array();
+                format!(
+                    "#{:X}{:X}{:X}{:X}",
+                    colors[0], colors[1], colors[2], colors[3]
+                )
+            }
+            Brush::Gradient(_gradient) => todo!(),
+            Brush::Image(_image) => todo!(),
+        };
+
+        let fill_color = match &self.fill_color {
+            Brush::Solid(alpha_color) => {
+                let colors = alpha_color.to_rgba8().to_u8_array();
+                format!(
+                    "#{:X}{:X}{:X}{:X}",
+                    colors[0], colors[1], colors[2], colors[3]
+                )
+            }
+            Brush::Gradient(_gradient) => todo!(),
+            Brush::Image(_image) => todo!(),
+        };
+
+        doc.append(
+            Circle::new()
+                .set("r", self.radius)
+                .set("cx", self.coord.x)
+                .set("cy", self.coord.y)
+                .set("fill", fill_color)
+                .set("stroke", stroke_color)
+                .set("stroke-width", self.stroke.width),
+        )
     }
 }

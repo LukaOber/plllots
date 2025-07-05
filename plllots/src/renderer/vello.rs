@@ -1,5 +1,5 @@
 use crate::chart::Chart;
-use kurbo::{Affine, BezPath, Line, Rect};
+use kurbo::{Affine, BezPath, Circle, Line, Point, Rect};
 use parley::{Alignment, AlignmentOptions};
 use parley::{FontContext, LayoutContext, PositionedLayoutItem, style::StyleProperty};
 use peniko::{Brush, Fill};
@@ -83,13 +83,18 @@ impl AppendVello for crate::primitives::Text<'_> {
             self.coord.x - text_x_offset as f64,
             self.coord.y - text_height as f64 / 2.0,
         ));
-        // .then_rotate_about(
-        //     3.14 / -2.0,
-        //     Point {
-        //         x: self.coord.x - text_x_offset as f64 / 1.0 + text_width as f64 / 2.0,
-        //         y: self.coord.y,
-        //     },
-        // );
+
+        let transform = match self.rotation {
+            Some(r) => transform.then_rotate_about(
+                r,
+                Point {
+                    x: self.coord.x - text_x_offset as f64 / 1.0 + text_width as f64 / 2.0,
+                    y: self.coord.y,
+                },
+            ),
+            None => transform,
+        };
+
         for line in layout.lines() {
             for item in line.items() {
                 if let PositionedLayoutItem::GlyphRun(glyph_run) = item {
@@ -148,6 +153,26 @@ impl AppendVello for crate::primitives::Path<'_> {
             self.stroke_color,
             None,
             &path,
+        );
+    }
+}
+
+impl AppendVello for crate::primitives::Circle<'_> {
+    fn append_vello(&self, scene: &mut Scene, _vello_render: &mut VelloRenderer) {
+        let circle = Circle::new(self.coord, self.radius);
+        scene.fill(
+            Fill::NonZero,
+            Affine::IDENTITY,
+            self.fill_color,
+            None,
+            &circle,
+        );
+        scene.stroke(
+            self.stroke,
+            Affine::IDENTITY,
+            self.stroke_color,
+            None,
+            &circle,
         );
     }
 }

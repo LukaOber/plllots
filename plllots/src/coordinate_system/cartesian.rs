@@ -104,6 +104,7 @@ impl<'a> AppendPrimitives<'a> for Cartesian {
                             helper,
                             theme,
                         );
+
                         self.series
                             .iter()
                             .enumerate()
@@ -114,10 +115,13 @@ impl<'a> AppendPrimitives<'a> for Cartesian {
                                 Series::Line(line) => {
                                     let mut path = crate::primitives::Path {
                                         stroke: line.stroke.as_ref().unwrap_or(&theme.line.stroke),
-                                        stroke_color: &theme.series_colors
-                                            [i % theme.series_colors.len()],
+                                        stroke_color: line.color.as_ref().unwrap_or(
+                                            &theme.series_colors[i % theme.series_colors.len()],
+                                        ),
                                         coords: Vec::with_capacity(line.data.len()),
                                     };
+                                    let mut symbols = Vec::with_capacity(line.data.len());
+
                                     for (index, y_item) in line.data.iter().enumerate() {
                                         let y_pos = {
                                             let percentage_height = (y_item - min) / (max - min);
@@ -129,8 +133,36 @@ impl<'a> AppendPrimitives<'a> for Cartesian {
                                         let x_pos = helper.offsets.x_axis_start
                                             + (index as f64 + 0.5) * x_spacing;
                                         path.coords.push(Point::new(x_pos, y_pos));
+                                        if line.symbol_show.unwrap_or(theme.line.symbol_show) {
+                                            symbols.push(crate::primitives::Primitives::Circle(
+                                                crate::primitives::Circle {
+                                                    stroke: line
+                                                        .symbol_stroke
+                                                        .as_ref()
+                                                        .unwrap_or(&theme.line.symbol_stroke),
+                                                    stroke_color: line
+                                                        .symbol_stroke_color
+                                                        .as_ref()
+                                                        .unwrap_or(
+                                                            &theme.series_colors
+                                                                [i % theme.series_colors.len()],
+                                                        ),
+                                                    fill_color: line
+                                                        .symbol_fill_color
+                                                        .as_ref()
+                                                        .unwrap_or(&theme.line.symbol_fill_color),
+                                                    coord: Point::new(x_pos, y_pos),
+                                                    radius: line
+                                                        .symbol_size
+                                                        .unwrap_or(theme.line.symbol_size),
+                                                },
+                                            ));
+                                        }
                                     }
                                     primitives.push(crate::primitives::Primitives::Path(path));
+                                    for symbol in symbols {
+                                        primitives.push(symbol);
+                                    }
                                 }
                             });
                     }

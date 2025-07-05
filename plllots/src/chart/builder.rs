@@ -96,6 +96,10 @@ impl Theme {
             },
             line: LineTheme {
                 stroke: Stroke::new(2.0),
+                symbol_show: true,
+                symbol_stroke: Stroke::new(2.0),
+                symbol_fill_color: Brush::Solid(Color::from_rgba8(0xff, 0xff, 0xff, 0xff)),
+                symbol_size: 2.0,
             },
             series_colors: vec![
                 Brush::Solid(Color::from_rgba8(0x54, 0x70, 0xc6, 0xff)),
@@ -134,4 +138,8 @@ pub struct CartesianAxisTheme {
 #[derive(Debug, Clone)]
 pub struct LineTheme {
     pub stroke: Stroke,
+    pub symbol_show: bool,
+    pub symbol_stroke: Stroke,
+    pub symbol_fill_color: Brush,
+    pub symbol_size: f64,
 }
