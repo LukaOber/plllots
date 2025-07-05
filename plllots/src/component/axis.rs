@@ -148,7 +148,6 @@ pub struct ValueAxis {
 pub(crate) struct ValueAxisMeta {
     pub min: f64,
     pub max: f64,
-    pub step_size: f64,
 }
 
 #[derive(Debug, Clone)]
@@ -539,11 +538,7 @@ impl<'a> ValueAxis {
             index, axis_type, primitives, helper, theme, min, max, step_size,
         );
         self.draw_axis_line(index, &AxisType::YAxis, primitives, helper, theme);
-        ValueAxisMeta {
-            min,
-            max,
-            step_size,
-        }
+        ValueAxisMeta { min, max }
     }
 
     pub(crate) fn draw_axis_line(

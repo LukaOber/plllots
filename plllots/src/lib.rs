@@ -56,7 +56,7 @@ pub use bon;
 mod tests {
     use crate::{
         chart::Chart,
-        component::{CategoryAxis, ValueAxis},
+        component::ValueAxis,
         coordinate_system::{Cartesian, CoordinateSystem},
         renderer::SvgRenderer,
         series::Line,

@@ -1,14 +1,9 @@
-use std::{
-    iter::{Filter, Peekable},
-    vec::IntoIter,
-};
-
 use bon::Builder;
-use kurbo::Point;
+use std::iter::Peekable;
 
 use crate::{
     chart::Theme,
-    component::{AxisType, CartesianAxis, ValueAxisMeta},
+    component::{AxisType, CartesianAxis},
     primitives::AppendPrimitives,
     series::Series,
 };
