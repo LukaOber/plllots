@@ -42,6 +42,23 @@ impl From<Vec<ValueAxis>> for CartesianAxis {
     }
 }
 
+pub(crate) enum SingleCartesianAxis<'a> {
+    Category(&'a CategoryAxis),
+    Value((&'a ValueAxis, &'a ValueAxisMeta)),
+}
+
+impl<'a> From<&'a CategoryAxis> for SingleCartesianAxis<'a> {
+    fn from(value: &'a CategoryAxis) -> Self {
+        SingleCartesianAxis::Category(value)
+    }
+}
+
+impl<'a> From<(&'a ValueAxis, &'a ValueAxisMeta)> for SingleCartesianAxis<'a> {
+    fn from(value: (&'a ValueAxis, &'a ValueAxisMeta)) -> Self {
+        SingleCartesianAxis::Value(value)
+    }
+}
+
 #[derive(Debug, Builder, Clone, Default)]
 pub struct CategoryAxis {
     #[builder(setters(option_fn(vis = "")))]
@@ -125,6 +142,13 @@ pub struct ValueAxis {
     pub labels_alignment: Option<Alignment>,
     #[builder(setters(option_fn(vis = "")))]
     pub labels_rotation: Option<f64>,
+}
+
+#[derive(Debug, Clone)]
+pub(crate) struct ValueAxisMeta {
+    pub min: f64,
+    pub max: f64,
+    pub step_size: f64,
 }
 
 #[derive(Debug, Clone)]
@@ -477,7 +501,7 @@ impl<'a> ValueAxis {
         theme: &'a Theme,
         mut filtered_series: impl Iterator<Item = &'a Series>,
         primary: bool,
-    ) -> (f64, f64, f64) {
+    ) -> ValueAxisMeta {
         let (mut min, mut max) = match filtered_series.next() {
             Some(s) => match s {
                 Series::Line(line) => {
@@ -515,7 +539,11 @@ impl<'a> ValueAxis {
             index, axis_type, primitives, helper, theme, min, max, step_size,
         );
         self.draw_axis_line(index, &AxisType::YAxis, primitives, helper, theme);
-        (min, max, step_size)
+        ValueAxisMeta {
+            min,
+            max,
+            step_size,
+        }
     }
 
     pub(crate) fn draw_axis_line(
