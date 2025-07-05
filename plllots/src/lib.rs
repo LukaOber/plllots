@@ -69,8 +69,8 @@ mod tests {
             .size(1000.0, 1000.0)
             .coordinate_system(CoordinateSystem::Cartesian(
                 Cartesian::builder()
-                    .x_axis(vec![ValueAxis::builder().build()])
-                    .y_axis(vec![ValueAxis::builder().build()])
+                    .x_axis(ValueAxis::default())
+                    .y_axis(ValueAxis::default())
                     .set_series(vec![
                         Line::builder()
                             .data(vec![

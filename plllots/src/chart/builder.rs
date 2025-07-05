@@ -67,7 +67,7 @@ impl Theme {
                     .with_start_cap(Cap::Square)
                     .with_end_cap(Cap::Square),
                 labels_show: true,
-                labels_margin: 14.0,
+                labels_margin: 8.0,
                 labels_color: Brush::Solid(Color::from_rgba8(0x6e, 0x70, 0x79, 0xff)),
                 labels_font_size: 12.0,
             },

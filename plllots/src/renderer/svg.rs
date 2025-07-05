@@ -216,3 +216,43 @@ impl AppendSvg for crate::primitives::Circle<'_> {
         )
     }
 }
+
+impl AppendSvg for crate::primitives::MultiCircle<'_> {
+    fn append_svg(&self, doc: &mut Document) {
+        let stroke_color = match &self.stroke_color {
+            Brush::Solid(alpha_color) => {
+                let colors = alpha_color.to_rgba8().to_u8_array();
+                format!(
+                    "#{:X}{:X}{:X}{:X}",
+                    colors[0], colors[1], colors[2], colors[3]
+                )
+            }
+            Brush::Gradient(_gradient) => todo!(),
+            Brush::Image(_image) => todo!(),
+        };
+
+        let fill_color = match &self.fill_color {
+            Brush::Solid(alpha_color) => {
+                let colors = alpha_color.to_rgba8().to_u8_array();
+                format!(
+                    "#{:X}{:X}{:X}{:X}",
+                    colors[0], colors[1], colors[2], colors[3]
+                )
+            }
+            Brush::Gradient(_gradient) => todo!(),
+            Brush::Image(_image) => todo!(),
+        };
+
+        for coord in &self.coords {
+            doc.append(
+                Circle::new()
+                    .set("r", self.radius)
+                    .set("cx", coord.x)
+                    .set("cy", coord.y)
+                    .set("fill", fill_color.clone())
+                    .set("stroke", stroke_color.clone())
+                    .set("stroke-width", self.stroke.width),
+            );
+        }
+    }
+}

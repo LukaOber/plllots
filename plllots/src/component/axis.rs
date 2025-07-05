@@ -42,7 +42,7 @@ impl From<Vec<ValueAxis>> for CartesianAxis {
     }
 }
 
-#[derive(Debug, Builder, Clone)]
+#[derive(Debug, Builder, Clone, Default)]
 pub struct CategoryAxis {
     #[builder(setters(option_fn(vis = "")))]
     pub axis_show: Option<bool>,
@@ -85,7 +85,7 @@ pub struct CategoryAxis {
     pub data: Vec<String>,
 }
 
-#[derive(Debug, Builder, Clone)]
+#[derive(Debug, Builder, Clone, Default)]
 pub struct ValueAxis {
     #[builder(setters(option_fn(vis = "")))]
     pub axis_show: Option<bool>,
@@ -379,9 +379,21 @@ impl<'a> CategoryAxis {
                     AxisType::XAxis => {
                         let pos_y = match position {
                             AxisPosition::Start => {
-                                helper.offsets.y_axis_start + labels_margin + offset
+                                helper.offsets.y_axis_start
+                                    + labels_margin
+                                    + offset
+                                    + self
+                                        .labels_font_size
+                                        .unwrap_or(theme.cartesian_value_axis.labels_font_size)
+                                        / 2.0
                             }
-                            AxisPosition::End => helper.offsets.y_axis_end - labels_margin + offset,
+                            AxisPosition::End => {
+                                helper.offsets.y_axis_end - labels_margin + offset
+                                    - self
+                                        .labels_font_size
+                                        .unwrap_or(theme.cartesian_value_axis.labels_font_size)
+                                        / 2.0
+                            }
                         };
 
                         let pos_x = helper.offsets.x_axis_start
@@ -741,9 +753,21 @@ impl<'a> ValueAxis {
                     AxisType::XAxis => {
                         let pos_y = match position {
                             AxisPosition::Start => {
-                                helper.offsets.y_axis_start + labels_margin + offset
+                                helper.offsets.y_axis_start
+                                    + labels_margin
+                                    + offset
+                                    + self
+                                        .labels_font_size
+                                        .unwrap_or(theme.cartesian_value_axis.labels_font_size)
+                                        / 2.0
                             }
-                            AxisPosition::End => helper.offsets.y_axis_end - labels_margin + offset,
+                            AxisPosition::End => {
+                                helper.offsets.y_axis_end - labels_margin + offset
+                                    - self
+                                        .labels_font_size
+                                        .unwrap_or(theme.cartesian_value_axis.labels_font_size)
+                                        / 2.0
+                            }
                         };
 
                         let pos_x =

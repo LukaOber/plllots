@@ -25,16 +25,4 @@ impl Series {
             Series::Line(line) => line.y_axis_index,
         }
     }
-
-    pub(crate) fn primary_data_index(&self) -> Option<usize> {
-        match self {
-            Series::Line(line) => line.data.primary_data_index,
-        }
-    }
-
-    pub(crate) fn secondary_data_index(&self) -> Option<usize> {
-        match self {
-            Series::Line(line) => line.data.secondary_data_index,
-        }
-    }
 }

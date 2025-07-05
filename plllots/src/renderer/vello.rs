@@ -1,5 +1,5 @@
 use crate::chart::Chart;
-use kurbo::{Affine, BezPath, Circle, Line, Point, Rect};
+use kurbo::{Affine, BezPath, Circle, Line, Point, Rect, Shape};
 use parley::{Alignment, AlignmentOptions};
 use parley::{FontContext, LayoutContext, PositionedLayoutItem, style::StyleProperty};
 use peniko::{Brush, Fill};
@@ -174,5 +174,16 @@ impl AppendVello for crate::primitives::Circle<'_> {
             None,
             &circle,
         );
+    }
+}
+
+impl AppendVello for crate::primitives::MultiCircle<'_> {
+    fn append_vello(&self, scene: &mut Scene, _vello_render: &mut VelloRenderer) {
+        let circle = Circle::new((0.0, 0.0), self.radius).into_path(0.1);
+        for coord in &self.coords {
+            let transform = Affine::translate((coord.x, coord.y));
+            scene.fill(Fill::NonZero, transform, self.fill_color, None, &circle);
+            scene.stroke(self.stroke, transform, self.stroke_color, None, &circle);
+        }
     }
 }
