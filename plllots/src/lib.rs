@@ -69,19 +69,23 @@ mod tests {
             .size(1000.0, 1000.0)
             .coordinate_system(CoordinateSystem::Cartesian(
                 Cartesian::builder()
-                    .x_axis(
-                        CategoryAxis::builder()
-                            .data(bon::vec!["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"])
-                            .build(),
-                    )
+                    .x_axis(vec![ValueAxis::builder().build()])
                     .y_axis(vec![ValueAxis::builder().build()])
                     .set_series(vec![
                         Line::builder()
                             .data(vec![150.0, 230.0, 224.0, 218.0, 135.0, 147.0, 260.0])
+                            .double_data(vec![
+                                vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0],
+                                vec![10.0, 20.0, -10.0, 0.0, 235.0, 247.0, 360.0],
+                            ])
                             .build(),
-                        Line::builder()
-                            .data(vec![250.0, 330.0, 324.0, 318.0, 235.0, 247.0, 360.0])
-                            .build(),
+                        // Line::builder()
+                        //     .data(vec![250.0, 330.0, 324.0, 318.0, 235.0, 247.0, 360.0])
+                        //     .double_data(vec![
+                        //         vec![250.0, 330.0, 324.0, 318.0, 235.0, 247.0, 360.0],
+                        //         vec![150.0, 230.0, 224.0, 218.0, 135.0, 147.0, 260.0],
+                        //     ])
+                        //     .build(),
                     ])
                     .build(),
             ))

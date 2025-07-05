@@ -23,4 +23,5 @@ pub struct Line {
     #[builder(setters(option_fn(vis = "")))]
     pub symbol_size: Option<f64>,
     pub data: Vec<f64>,
+    pub double_data: Vec<Vec<f64>>,
 }
