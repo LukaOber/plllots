@@ -146,7 +146,7 @@ impl<'a> AppendPrimitives<'a> for Cartesian {
                         helper,
                         theme,
                         filtered_series,
-                        true,
+                        false,
                     );
                     for (y_axis_index, y_axis) in y_axes.iter().enumerate() {
                         let mut filtered_series = self.filtered_series(None, Some(y_axis_index));
