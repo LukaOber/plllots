@@ -111,6 +111,9 @@ impl Theme {
                 Brush::Solid(Color::from_rgba8(0xfc, 0x84, 0x52, 0xff)),
                 Brush::Solid(Color::from_rgba8(0x9a, 0x60, 0xb4, 0xff)),
                 Brush::Solid(Color::from_rgba8(0xea, 0x7c, 0xcc, 0xff)),
+                Brush::Solid(Color::from_rgba8(0x17, 0xa2, 0xb8, 0xff)),
+                Brush::Solid(Color::from_rgba8(0xf3, 0x9c, 0x12, 0xff)),
+                Brush::Solid(Color::from_rgba8(0x26, 0xde, 0x81, 0xff)),
             ],
         }
     }

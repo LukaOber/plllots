@@ -2,8 +2,6 @@ pub mod line;
 
 pub use line::*;
 
-use crate::utils::get_raw_range;
-
 #[derive(Debug, Clone)]
 pub enum Series {
     Line(Line),
@@ -16,12 +14,6 @@ impl From<Line> for Series {
 }
 
 impl Series {
-    pub(crate) fn get_raw_range(&self) -> (f64, f64) {
-        match self {
-            Series::Line(line) => get_raw_range(&line.data),
-        }
-    }
-
     pub(crate) fn x_axis_index(&self) -> usize {
         match self {
             Series::Line(line) => line.x_axis_index,
@@ -31,6 +23,18 @@ impl Series {
     pub(crate) fn y_axis_index(&self) -> usize {
         match self {
             Series::Line(line) => line.y_axis_index,
+        }
+    }
+
+    pub(crate) fn primary_data_index(&self) -> Option<usize> {
+        match self {
+            Series::Line(line) => line.data.primary_data_index,
+        }
+    }
+
+    pub(crate) fn secondary_data_index(&self) -> Option<usize> {
+        match self {
+            Series::Line(line) => line.data.secondary_data_index,
         }
     }
 }

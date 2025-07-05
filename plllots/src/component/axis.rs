@@ -8,6 +8,8 @@ use peniko::Brush;
 use crate::{
     chart::{ChartHelper, Theme},
     primitives::Primitives,
+    series::Series,
+    utils::{get_raw_range, get_scale_details},
 };
 
 #[derive(Debug, Clone)]
@@ -138,6 +140,20 @@ pub(crate) enum AxisType {
 }
 
 impl<'a> CategoryAxis {
+    pub(crate) fn draw_axis(
+        &'a self,
+        index: usize,
+        axis_type: &AxisType,
+        primitives: &mut Vec<Primitives<'a>>,
+        helper: &ChartHelper,
+        theme: &'a Theme,
+    ) {
+        self.draw_split_lines(axis_type, primitives, helper, theme);
+        self.draw_axis_ticks(index, axis_type, primitives, helper, theme);
+        self.draw_labels(index, axis_type, primitives, helper, theme);
+        self.draw_axis_line(index, axis_type, primitives, helper, theme);
+    }
+
     pub(crate) fn draw_axis_line(
         &'a self,
         index: usize,
@@ -440,6 +456,56 @@ impl<'a> CategoryAxis {
 }
 
 impl<'a> ValueAxis {
+    pub(crate) fn draw_axis(
+        &'a self,
+        index: usize,
+        axis_type: &AxisType,
+        primitives: &mut Vec<Primitives<'a>>,
+        helper: &ChartHelper,
+        theme: &'a Theme,
+        mut filtered_series: impl Iterator<Item = &'a Series>,
+        primary: bool,
+    ) -> (f64, f64, f64) {
+        let (mut min, mut max) = match filtered_series.next() {
+            Some(s) => match s {
+                Series::Line(line) => {
+                    let data_index = match primary {
+                        true => line.data.primary_data_index.unwrap_or(0),
+                        false => line.data.secondary_data_index.unwrap_or(1),
+                    };
+                    get_raw_range(&line.data.data[data_index])
+                }
+            },
+            None => unreachable!(),
+        };
+
+        for series in filtered_series {
+            let (s_min, s_max) = match series {
+                Series::Line(line) => {
+                    let data_index = match primary {
+                        true => line.data.primary_data_index.unwrap_or(0),
+                        false => line.data.secondary_data_index.unwrap_or(1),
+                    };
+                    get_raw_range(&line.data.data[data_index])
+                }
+            };
+            min = min.min(s_min);
+            max = max.max(s_max);
+        }
+
+        let (min, max, step_size) = get_scale_details(min, max);
+
+        self.draw_split_lines(axis_type, primitives, helper, theme, min, max, step_size);
+        self.draw_axis_ticks(
+            index, axis_type, primitives, helper, theme, min, max, step_size,
+        );
+        self.draw_labels(
+            index, axis_type, primitives, helper, theme, min, max, step_size,
+        );
+        self.draw_axis_line(index, &AxisType::YAxis, primitives, helper, theme);
+        (min, max, step_size)
+    }
+
     pub(crate) fn draw_axis_line(
         &'a self,
         index: usize,
