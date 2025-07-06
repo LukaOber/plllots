@@ -91,6 +91,6 @@ pub struct MultiCircle<'a> {
     pub stroke: &'a Stroke,
     pub stroke_color: &'a Brush,
     pub fill_color: &'a Brush,
-    pub coords: &'a Vec<Point>,
+    pub coords: Vec<Point>,
     pub radius: f64,
 }
