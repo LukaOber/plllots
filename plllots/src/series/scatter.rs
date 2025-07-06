@@ -9,60 +9,58 @@ use crate::{
 };
 
 #[derive(Debug, Builder, Clone)]
-pub struct Line {
+pub struct Scatter {
     #[builder(setters(option_fn(vis = "")))]
     pub stroke: Option<Stroke>,
     #[builder(setters(option_fn(vis = "")))]
-    pub color: Option<Brush>,
+    pub stroke_color: Option<Brush>,
+    #[builder(setters(option_fn(vis = "")))]
+    pub fill_color: Option<Brush>,
+    #[builder(setters(option_fn(vis = "")))]
+    pub symbol_size: Option<f64>,
     #[builder(default = 0, setters(option_fn(vis = "")))]
     pub x_axis_index: usize,
     #[builder(default = 0, setters(option_fn(vis = "")))]
     pub y_axis_index: usize,
-    #[builder(setters(option_fn(vis = "")))]
-    pub symbol_show: Option<bool>,
-    #[builder(setters(option_fn(vis = "")))]
-    pub symbol_stroke: Option<Stroke>,
-    #[builder(setters(option_fn(vis = "")))]
-    pub symbol_stroke_color: Option<Brush>,
-    #[builder(setters(option_fn(vis = "")))]
-    pub symbol_fill_color: Option<Brush>,
-    #[builder(setters(option_fn(vis = "")))]
-    pub symbol_size: Option<f64>,
     #[builder(into)]
-    pub data: LineData,
+    pub data: ScatterData,
 }
 
 #[derive(Debug, Builder, Clone)]
-pub struct LineData {
+pub struct ScatterData {
     #[builder(setters(option_fn(vis = "")))]
     pub primary_data_index: Option<usize>,
     #[builder(setters(option_fn(vis = "")))]
     pub secondary_data_index: Option<usize>,
+    #[builder(setters(option_fn(vis = "")))]
+    pub symbol_size_index: Option<usize>,
     pub data: Vec<Vec<f64>>,
 }
 
-impl From<Vec<f64>> for LineData {
+impl From<Vec<f64>> for ScatterData {
     fn from(value: Vec<f64>) -> Self {
-        LineData {
+        ScatterData {
             primary_data_index: None,
             secondary_data_index: None,
+            symbol_size_index: None,
             data: vec![value],
         }
     }
 }
 
-impl From<Vec<Vec<f64>>> for LineData {
+impl From<Vec<Vec<f64>>> for ScatterData {
     fn from(value: Vec<Vec<f64>>) -> Self {
-        LineData {
+        ScatterData {
             primary_data_index: None,
             secondary_data_index: None,
+            symbol_size_index: None,
             data: value,
         }
     }
 }
 
-impl Line {
-    pub(crate) fn draw_line<'a>(
+impl Scatter {
+    pub(crate) fn draw_scatter<'a>(
         &'a self,
         series_index: usize,
         x_axis: &SingleCartesianAxis,
@@ -71,23 +69,6 @@ impl Line {
         primitives: &mut Vec<Primitives<'a>>,
         theme: &'a Theme,
     ) {
-        primitives.push(crate::primitives::Primitives::Path(
-            crate::primitives::Path {
-                stroke: self.stroke.as_ref().unwrap_or(&theme.line.stroke),
-                stroke_color: self
-                    .color
-                    .as_ref()
-                    .unwrap_or(&theme.series_colors[series_index % theme.series_colors.len()]),
-                coords: Vec::new(),
-            },
-        ));
-        let path = match primitives.last_mut() {
-            Some(p) => match p {
-                Primitives::Path(path) => path,
-                _ => unreachable!(),
-            },
-            None => unreachable!(),
-        };
         match (x_axis, y_axis) {
             (SingleCartesianAxis::Category(_x_axis), SingleCartesianAxis::Category(_y_axis)) => {
                 todo!()
@@ -107,11 +88,27 @@ impl Line {
                 };
 
                 let primary_data_index = self.data.primary_data_index.unwrap_or(0);
-                path.coords
-                    .reserve(self.data.data[primary_data_index].len());
+                let allocation_size = self.data.data[primary_data_index].len();
+                primitives.reserve(allocation_size);
                 for (index, value) in self.data.data[primary_data_index].iter().enumerate() {
-                    path.coords
-                        .push(Point::new(x_pos(index, *value), y_pos(index, *value)));
+                    let radius = match self.data.symbol_size_index {
+                        Some(i) => self.data.data[i][index],
+                        None => self.symbol_size.unwrap_or(theme.scatter.symbol_size),
+                    };
+                    primitives.push(crate::primitives::Primitives::Circle(
+                        crate::primitives::Circle {
+                            stroke: self.stroke.as_ref().unwrap_or(&theme.scatter.stroke),
+                            stroke_color: self
+                                .stroke_color
+                                .as_ref()
+                                .unwrap_or(&theme.scatter.stroke_color),
+                            fill_color: self.fill_color.as_ref().unwrap_or(
+                                &theme.series_colors[series_index % theme.series_colors.len()],
+                            ),
+                            coord: Point::new(x_pos(index, *value), y_pos(index, *value)),
+                            radius,
+                        },
+                    ));
                 }
             }
             (
@@ -129,11 +126,27 @@ impl Line {
                 };
 
                 let primary_data_index = self.data.primary_data_index.unwrap_or(0);
-                path.coords
-                    .reserve(self.data.data[primary_data_index].len());
+                let allocation_size = self.data.data[primary_data_index].len();
+                primitives.reserve(allocation_size);
                 for (index, value) in self.data.data[primary_data_index].iter().enumerate() {
-                    path.coords
-                        .push(Point::new(x_pos(index, *value), y_pos(index, *value)));
+                    let radius = match self.data.symbol_size_index {
+                        Some(i) => self.data.data[i][index],
+                        None => self.symbol_size.unwrap_or(theme.scatter.symbol_size),
+                    };
+                    primitives.push(crate::primitives::Primitives::Circle(
+                        crate::primitives::Circle {
+                            stroke: self.stroke.as_ref().unwrap_or(&theme.scatter.stroke),
+                            stroke_color: self
+                                .stroke_color
+                                .as_ref()
+                                .unwrap_or(&theme.scatter.stroke_color),
+                            fill_color: self.fill_color.as_ref().unwrap_or(
+                                &theme.series_colors[series_index % theme.series_colors.len()],
+                            ),
+                            coord: Point::new(x_pos(index, *value), y_pos(index, *value)),
+                            radius,
+                        },
+                    ));
                 }
             }
             (
@@ -150,41 +163,36 @@ impl Line {
                 };
                 let primary_data_index = self.data.primary_data_index.unwrap_or(0);
                 let secondary_data_index = self.data.secondary_data_index.unwrap_or(1);
-                path.coords
-                    .reserve(self.data.data[primary_data_index].len());
-
+                let allocation_size = self.data.data[primary_data_index].len();
+                primitives.reserve(allocation_size);
                 for (index, (primary_value, secondary_value)) in self.data.data[primary_data_index]
                     .iter()
                     .zip(self.data.data[secondary_data_index].iter())
                     .enumerate()
                 {
-                    path.coords.push(Point::new(
-                        x_pos(index, *secondary_value),
-                        y_pos(index, *primary_value),
+                    let radius = match self.data.symbol_size_index {
+                        Some(i) => self.data.data[i][index],
+                        None => self.symbol_size.unwrap_or(theme.scatter.symbol_size),
+                    };
+                    primitives.push(crate::primitives::Primitives::Circle(
+                        crate::primitives::Circle {
+                            stroke: self.stroke.as_ref().unwrap_or(&theme.scatter.stroke),
+                            stroke_color: self
+                                .stroke_color
+                                .as_ref()
+                                .unwrap_or(&theme.scatter.stroke_color),
+                            fill_color: self.fill_color.as_ref().unwrap_or(
+                                &theme.series_colors[series_index % theme.series_colors.len()],
+                            ),
+                            coord: Point::new(
+                                x_pos(index, *secondary_value),
+                                y_pos(index, *primary_value),
+                            ),
+                            radius,
+                        },
                     ));
                 }
             }
         };
-        if self.symbol_show.unwrap_or(theme.line.symbol_show) {
-            let nulti_circle =
-                crate::primitives::Primitives::MultiCircle(crate::primitives::MultiCircle {
-                    stroke: self
-                        .symbol_stroke
-                        .as_ref()
-                        .unwrap_or(&theme.line.symbol_stroke),
-                    stroke_color: self
-                        .symbol_stroke_color
-                        .as_ref()
-                        .unwrap_or(&theme.series_colors[series_index % theme.series_colors.len()]),
-                    fill_color: self
-                        .symbol_fill_color
-                        .as_ref()
-                        .unwrap_or(&theme.line.symbol_fill_color),
-                    // TODO: find a way to remove this clone
-                    coords: path.coords.clone(),
-                    radius: self.symbol_size.unwrap_or(theme.line.symbol_size),
-                });
-            primitives.push(nulti_circle);
-        }
     }
 }

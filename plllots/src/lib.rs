@@ -56,10 +56,10 @@ pub use bon;
 mod tests {
     use crate::{
         chart::Chart,
-        component::ValueAxis,
+        component::{CategoryAxis, ValueAxis},
         coordinate_system::{Cartesian, CoordinateSystem},
         renderer::SvgRenderer,
-        series::Line,
+        series::{Line, Scatter, ScatterData},
     };
 
     #[test]
@@ -70,14 +70,33 @@ mod tests {
             .coordinate_system(CoordinateSystem::Cartesian(
                 Cartesian::builder()
                     .x_axis(ValueAxis::default())
-                    .y_axis(ValueAxis::default())
-                    .set_series(vec![
-                        Line::builder()
-                            .data(vec![
-                                vec![150.0, 230.0, 224.0, 218.0, 135.0, 147.0, 260.0],
-                                vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0],
-                            ])
+                    .y_axis(
+                        CategoryAxis::builder()
+                            .data(bon::vec!["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun",])
                             .build(),
+                    )
+                    .set_series(vec![
+                        Scatter::builder()
+                            .data(ScatterData {
+                                // primary_data_index: Some(0),
+                                // secondary_data_index: Some(1),
+                                // symbol_size_index: Some(2),
+                                primary_data_index: None,
+                                secondary_data_index: None,
+                                symbol_size_index: Some(2),
+                                data: vec![
+                                    vec![150.0, 230.0, 224.0, 218.0, 135.0, 147.0, 260.0],
+                                    vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0],
+                                    vec![11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0],
+                                ],
+                            })
+                            .build(),
+                        // Scatter::builder()
+                        //     .data(vec![
+                        //         vec![200.0, 280.0, 274.0, 268.0, 185.0, 197.0, 310.0],
+                        //         vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0],
+                        //     ])
+                        //     .build(),
                     ])
                     .build(),
             ))

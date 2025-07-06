@@ -510,6 +510,13 @@ impl<'a> ValueAxis {
                     };
                     get_raw_range(&line.data.data[data_index])
                 }
+                Series::Scatter(scatter) => {
+                    let data_index = match primary {
+                        true => scatter.data.primary_data_index.unwrap_or(0),
+                        false => scatter.data.secondary_data_index.unwrap_or(1),
+                    };
+                    get_raw_range(&scatter.data.data[data_index])
+                }
             },
             None => unreachable!(),
         };
@@ -522,6 +529,14 @@ impl<'a> ValueAxis {
                         false => line.data.secondary_data_index.unwrap_or(1),
                     };
                     get_raw_range(&line.data.data[data_index])
+                }
+
+                Series::Scatter(scatter) => {
+                    let data_index = match primary {
+                        true => scatter.data.primary_data_index.unwrap_or(0),
+                        false => scatter.data.secondary_data_index.unwrap_or(1),
+                    };
+                    get_raw_range(&scatter.data.data[data_index])
                 }
             };
             min = min.min(s_min);

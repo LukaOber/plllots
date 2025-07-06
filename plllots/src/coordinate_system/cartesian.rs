@@ -87,6 +87,14 @@ impl<'a> AppendPrimitives<'a> for Cartesian {
                                 primitives,
                                 theme,
                             ),
+                            Series::Scatter(scatter) => scatter.draw_scatter(
+                                i,
+                                &x_axis.into(),
+                                &(y_axis, &y_axis_meta).into(),
+                                helper,
+                                primitives,
+                                theme,
+                            ),
                         });
                     }
                 }
@@ -115,6 +123,14 @@ impl<'a> AppendPrimitives<'a> for Cartesian {
                             self.filtered_series(Some(x_axis_index), Some(y_axis_index));
                         filtered_series.enumerate().for_each(|(i, s)| match s {
                             Series::Line(line) => line.draw_line(
+                                i,
+                                &(x_axis, &x_axis_meta).into(),
+                                &y_axis.into(),
+                                helper,
+                                primitives,
+                                theme,
+                            ),
+                            Series::Scatter(scatter) => scatter.draw_scatter(
                                 i,
                                 &(x_axis, &x_axis_meta).into(),
                                 &y_axis.into(),
@@ -159,10 +175,20 @@ impl<'a> AppendPrimitives<'a> for Cartesian {
                             filtered_series,
                             true,
                         );
+                        println!("{:?}", x_axis_meta);
+                        println!("{:?}", y_axis_meta);
                         let filtered_series =
                             self.filtered_series(Some(x_axis_index), Some(y_axis_index));
                         filtered_series.enumerate().for_each(|(i, s)| match s {
                             Series::Line(line) => line.draw_line(
+                                i,
+                                &(x_axis, &x_axis_meta).into(),
+                                &(y_axis, &y_axis_meta).into(),
+                                helper,
+                                primitives,
+                                theme,
+                            ),
+                            Series::Scatter(scatter) => scatter.draw_scatter(
                                 i,
                                 &(x_axis, &x_axis_meta).into(),
                                 &(y_axis, &y_axis_meta).into(),

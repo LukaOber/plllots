@@ -41,6 +41,7 @@ pub struct Theme {
     pub cartesian_category_axis: CartesianAxisTheme,
     pub cartesian_value_axis: CartesianAxisTheme,
     pub line: LineTheme,
+    pub scatter: ScatterTheme,
     pub series_colors: Vec<Brush>,
 }
 
@@ -101,6 +102,11 @@ impl Theme {
                 symbol_fill_color: Brush::Solid(Color::from_rgba8(0xff, 0xff, 0xff, 0xff)),
                 symbol_size: 2.0,
             },
+            scatter: ScatterTheme {
+                stroke: Stroke::new(0.0),
+                stroke_color: Brush::Solid(Color::from_rgba8(0xee, 0xee, 0xee, 0xff)),
+                symbol_size: 10.0,
+            },
             series_colors: vec![
                 Brush::Solid(Color::from_rgba8(0x54, 0x70, 0xc6, 0xff)),
                 Brush::Solid(Color::from_rgba8(0x91, 0xcc, 0x75, 0xff)),
@@ -144,5 +150,12 @@ pub struct LineTheme {
     pub symbol_show: bool,
     pub symbol_stroke: Stroke,
     pub symbol_fill_color: Brush,
+    pub symbol_size: f64,
+}
+
+#[derive(Debug, Clone)]
+pub struct ScatterTheme {
+    pub stroke: Stroke,
+    pub stroke_color: Brush,
     pub symbol_size: f64,
 }
