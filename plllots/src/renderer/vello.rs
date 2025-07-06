@@ -58,17 +58,17 @@ impl VelloRenderer {
                 && offsets.y_axis_start >= p.y
                 && p.y >= offsets.y_axis_end
             {
-                let dash_size = offsets.x_span / 45.0;
+                let x_dash_size = offsets.x_span / 45.0;
+                let y_dash_size = offsets.y_span / 45.0;
                 let brush = Brush::Solid(Color::from_rgba8(0xcc, 0xcc, 0xcc, 0xff));
 
-                let x_stroke = Stroke::new(1.0).with_dashes(0.0, [dash_size]);
+                let x_stroke = Stroke::new(1.0).with_dashes(0.0, [x_dash_size]);
                 let x_line = Line::new(
                     Point::new(offsets.x_axis_start, p.y),
                     Point::new(offsets.x_axis_end, p.y),
                 );
 
-                let y_stroke = Stroke::new(1.0).with_dashes(0.0, [dash_size]);
-
+                let y_stroke = Stroke::new(1.0).with_dashes(0.0, [y_dash_size]);
                 let y_line = Line::new(
                     Point::new(p.x, offsets.y_axis_start),
                     Point::new(p.x, offsets.y_axis_end),
