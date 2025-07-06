@@ -1,4 +1,3 @@
-use kurbo::Point;
 pub(crate) mod lttb;
 
 pub(crate) fn get_scale_details(min: f64, max: f64) -> (f64, f64, f64) {

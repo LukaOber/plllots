@@ -1,5 +1,3 @@
-use std::time::Instant;
-
 use bon::Builder;
 use kurbo::{Point, Stroke};
 use peniko::Brush;
@@ -8,7 +6,7 @@ use crate::{
     chart::{ChartHelper, Theme},
     component::SingleCartesianAxis,
     primitives::Primitives,
-    utils::lttb::{lttb, lttb_optimized_memory, lttb_parallel, lttb_simd_wide},
+    utils::lttb::lttb_optimized_memory,
 };
 
 #[derive(Debug, Builder, Clone)]
@@ -166,20 +164,20 @@ impl Line {
             Some(t) => {
                 // TODO probably need to keep original index
                 path.coords.reserve(t);
-                let coords: Vec<_> = self.data.data[primary_data_index]
+                let (primary_values, secondary_values) = lttb_optimized_memory(
+                    &self.data.data[primary_data_index],
+                    &self.data.data[secondary_data_index],
+                    t,
+                );
+                for (index, (primary_value, secondary_value)) in primary_values
                     .iter()
-                    .zip(self.data.data[secondary_data_index].iter())
-                    .map(|(primary_value, secondary_value)| {
-                        Point::new(*secondary_value, *primary_value)
-                    })
-                    .collect();
-
-                let instant = Instant::now();
-                let coords = lttb_optimized_memory(&coords, t);
-                println!("lttb {:?}", instant.elapsed());
-                for (index, point) in coords.iter().enumerate() {
-                    path.coords
-                        .push(Point::new(x_pos(index, point.x), y_pos(index, point.y)));
+                    .zip(secondary_values.iter())
+                    .enumerate()
+                {
+                    path.coords.push(Point::new(
+                        x_pos(index, *secondary_value),
+                        y_pos(index, *primary_value),
+                    ));
                 }
             }
             None => {
