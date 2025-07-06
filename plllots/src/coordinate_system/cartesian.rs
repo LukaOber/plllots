@@ -175,8 +175,6 @@ impl<'a> AppendPrimitives<'a> for Cartesian {
                             filtered_series,
                             true,
                         );
-                        println!("{:?}", x_axis_meta);
-                        println!("{:?}", y_axis_meta);
                         let filtered_series =
                             self.filtered_series(Some(x_axis_index), Some(y_axis_index));
                         filtered_series.enumerate().for_each(|(i, s)| match s {

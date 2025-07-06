@@ -155,7 +155,6 @@ impl Scatter {
                 Some(i) => self.data.data[i][index],
                 None => self.symbol_size.unwrap_or(theme.scatter.symbol_size),
             };
-            println!("{:?} {:?}", primary_value, secondary_value);
             primitives.push(crate::primitives::Primitives::Circle(
                 crate::primitives::Circle {
                     stroke: self.stroke.as_ref().unwrap_or(&theme.scatter.stroke),

@@ -6,6 +6,7 @@ use crate::{
     chart::{ChartHelper, Theme},
     component::SingleCartesianAxis,
     primitives::Primitives,
+    utils::lttb,
 };
 
 #[derive(Debug, Builder, Clone)]
@@ -38,6 +39,8 @@ pub struct LineData {
     pub primary_data_index: Option<usize>,
     #[builder(setters(option_fn(vis = "")))]
     pub secondary_data_index: Option<usize>,
+    #[builder(setters(option_fn(vis = "")))]
+    pub lttb: Option<usize>,
     pub data: Vec<Vec<f64>>,
 }
 
@@ -46,6 +49,7 @@ impl From<Vec<f64>> for LineData {
         LineData {
             primary_data_index: None,
             secondary_data_index: None,
+            lttb: None,
             data: vec![value],
         }
     }
@@ -56,6 +60,7 @@ impl From<Vec<Vec<f64>>> for LineData {
         LineData {
             primary_data_index: None,
             secondary_data_index: None,
+            lttb: None,
             data: value,
         }
     }
@@ -147,64 +152,53 @@ impl Line {
         primary_data_index: usize,
         secondary_data_index: usize,
     ) {
-        primitives.push(crate::primitives::Primitives::Path(
-            crate::primitives::Path {
-                stroke: self.stroke.as_ref().unwrap_or(&theme.line.stroke),
-                stroke_color: self
-                    .color
-                    .as_ref()
-                    .unwrap_or(&theme.series_colors[series_index % theme.series_colors.len()]),
-                coords: Vec::new(),
-            },
-        ));
+        let mut path = crate::primitives::Path {
+            stroke: self.stroke.as_ref().unwrap_or(&theme.line.stroke),
+            stroke_color: self
+                .color
+                .as_ref()
+                .unwrap_or(&theme.series_colors[series_index % theme.series_colors.len()]),
+            coords: Vec::new(),
+        };
+        for (index, (primary_value, secondary_value)) in self.data.data[primary_data_index]
+            .iter()
+            .zip(self.data.data[secondary_data_index].iter())
+            .enumerate()
         {
-            let path = match primitives.last_mut() {
-                Some(p) => match p {
-                    Primitives::Path(path) => path,
-                    _ => unreachable!(),
-                },
-                None => unreachable!(),
-            };
-            for (index, (primary_value, secondary_value)) in self.data.data[primary_data_index]
-                .iter()
-                .zip(self.data.data[secondary_data_index].iter())
-                .enumerate()
-            {
-                path.coords.push(Point::new(
-                    x_pos(index, *secondary_value),
-                    y_pos(index, *primary_value),
-                ));
-            }
+            path.coords.push(Point::new(
+                x_pos(index, *secondary_value),
+                y_pos(index, *primary_value),
+            ));
         }
 
-        // let coords = match primitives.last() {
-        //     Some(p) => match p {
-        //         Primitives::Path(path) => &path.coords,
-        //         _ => unreachable!(),
-        //     },
-        //     None => todo!(),
-        // };
+        path.coords = match self.data.lttb {
+            Some(t) => lttb(path.coords, t),
+            None => path.coords,
+        };
 
-        // if self.symbol_show.unwrap_or(theme.line.symbol_show) {
-        //     let nulti_circle =
-        //         crate::primitives::Primitives::MultiCircle(crate::primitives::MultiCircle {
-        //             stroke: self
-        //                 .symbol_stroke
-        //                 .as_ref()
-        //                 .unwrap_or(&theme.line.symbol_stroke),
-        //             stroke_color: self
-        //                 .symbol_stroke_color
-        //                 .as_ref()
-        //                 .unwrap_or(&theme.series_colors[series_index % theme.series_colors.len()]),
-        //             fill_color: self
-        //                 .symbol_fill_color
-        //                 .as_ref()
-        //                 .unwrap_or(&theme.line.symbol_fill_color),
-        //             // TODO: find a way to remove this clone
-        //             coords: coords.as_ref(),
-        //             radius: self.symbol_size.unwrap_or(theme.line.symbol_size),
-        //         });
-        //     primitives.push(nulti_circle);
-        // }
+        if self.symbol_show.unwrap_or(theme.line.symbol_show) {
+            let nulti_circle =
+                crate::primitives::Primitives::MultiCircle(crate::primitives::MultiCircle {
+                    stroke: self
+                        .symbol_stroke
+                        .as_ref()
+                        .unwrap_or(&theme.line.symbol_stroke),
+                    stroke_color: self
+                        .symbol_stroke_color
+                        .as_ref()
+                        .unwrap_or(&theme.series_colors[series_index % theme.series_colors.len()]),
+                    fill_color: self
+                        .symbol_fill_color
+                        .as_ref()
+                        .unwrap_or(&theme.line.symbol_fill_color),
+                    // TODO: find a way to remove this clone
+                    coords: path.coords.clone(),
+                    radius: self.symbol_size.unwrap_or(theme.line.symbol_size),
+                });
+            primitives.push(crate::primitives::Primitives::Path(path));
+            primitives.push(nulti_circle);
+        } else {
+            primitives.push(crate::primitives::Primitives::Path(path));
+        }
     }
 }
