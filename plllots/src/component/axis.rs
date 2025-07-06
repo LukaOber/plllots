@@ -12,7 +12,7 @@ use crate::{
     utils::{get_raw_range, get_scale_details},
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum CartesianAxis {
     Category(Vec<CategoryAxis>),
     Value(Vec<ValueAxis>),
@@ -59,7 +59,7 @@ impl<'a> From<(&'a ValueAxis, &'a ValueAxisMeta)> for SingleCartesianAxis<'a> {
     }
 }
 
-#[derive(Debug, Builder, Clone, Default)]
+#[derive(Debug, Builder, Clone, PartialEq)]
 pub struct CategoryAxis {
     #[builder(setters(option_fn(vis = "")))]
     pub axis_show: Option<bool>,
@@ -102,7 +102,7 @@ pub struct CategoryAxis {
     pub data: Vec<String>,
 }
 
-#[derive(Debug, Builder, Clone, Default)]
+#[derive(Debug, Builder, Clone, Default, PartialEq)]
 pub struct ValueAxis {
     #[builder(setters(option_fn(vis = "")))]
     pub axis_show: Option<bool>,
@@ -144,19 +144,19 @@ pub struct ValueAxis {
     pub labels_rotation: Option<f64>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub(crate) struct ValueAxisMeta {
     pub min: f64,
     pub max: f64,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum AxisPosition {
     Start,
     End,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub(crate) enum AxisType {
     XAxis,
     YAxis,

@@ -8,7 +8,7 @@ use crate::{
     series::Series,
 };
 
-#[derive(Debug, Builder, Clone)]
+#[derive(Debug, Builder, Clone, PartialEq)]
 pub struct Cartesian {
     #[builder(field)]
     pub series: Vec<Series>,

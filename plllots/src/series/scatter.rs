@@ -8,7 +8,7 @@ use crate::{
     primitives::Primitives,
 };
 
-#[derive(Debug, Builder, Clone)]
+#[derive(Debug, Builder, Clone, PartialEq)]
 pub struct Scatter {
     #[builder(setters(option_fn(vis = "")))]
     pub stroke: Option<Stroke>,
@@ -26,7 +26,7 @@ pub struct Scatter {
     pub data: ScatterData,
 }
 
-#[derive(Debug, Builder, Clone)]
+#[derive(Debug, Builder, Clone, PartialEq)]
 pub struct ScatterData {
     #[builder(setters(option_fn(vis = "")))]
     pub primary_data_index: Option<usize>,

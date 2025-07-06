@@ -4,7 +4,7 @@ pub mod scatter;
 pub use line::*;
 pub use scatter::*;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Series {
     Line(Line),
     Scatter(Scatter),

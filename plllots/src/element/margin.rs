@@ -1,13 +1,13 @@
 use super::size::PlotSize;
 use bon::Builder;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum MarginType {
     Pixel(f64),
     Percentage(f64),
 }
 
-#[derive(Debug, Builder, Clone, Copy)]
+#[derive(Debug, Builder, Clone, PartialEq)]
 pub struct Margins {
     pub left: MarginType,
     pub top: MarginType,

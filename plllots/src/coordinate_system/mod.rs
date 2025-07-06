@@ -4,7 +4,7 @@ pub use cartesian::*;
 
 use crate::{chart::Theme, primitives::AppendPrimitives};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum CoordinateSystem {
     Cartesian(Cartesian),
 }

@@ -9,7 +9,7 @@ use crate::{
     utils::lttb::lttb_optimized_memory,
 };
 
-#[derive(Debug, Builder, Clone)]
+#[derive(Debug, Builder, Clone, PartialEq)]
 pub struct Line {
     #[builder(setters(option_fn(vis = "")))]
     pub stroke: Option<Stroke>,
@@ -33,7 +33,7 @@ pub struct Line {
     pub data: LineData,
 }
 
-#[derive(Debug, Builder, Clone)]
+#[derive(Debug, Builder, Clone, PartialEq)]
 pub struct LineData {
     #[builder(setters(option_fn(vis = "")))]
     pub primary_data_index: Option<usize>,

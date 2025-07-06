@@ -6,7 +6,7 @@ use bon::Builder;
 use kurbo::{Cap, Stroke};
 use peniko::{Brush, Color};
 
-#[derive(Debug, Clone, Builder)]
+#[derive(Debug, PartialEq, Clone, Builder)]
 pub struct Chart {
     #[builder(with = |width: f64, height: f64| PlotSize { width, height })]
     pub size: PlotSize,
@@ -20,8 +20,8 @@ pub struct Chart {
 impl Chart {
     pub(crate) fn create_plot_helper(&self) -> ChartHelper {
         ChartHelper {
-            plot_size: self.size,
-            margins: self.margins,
+            plot_size: self.size.clone(),
+            margins: self.margins.clone(),
             offsets: Offsets::from_margin(&self.size, &self.margins),
         }
     }
@@ -35,7 +35,7 @@ impl Chart {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Theme {
     pub background: Color,
     pub cartesian_category_axis: CartesianAxisTheme,
@@ -125,7 +125,7 @@ impl Theme {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct CartesianAxisTheme {
     pub axis_show: bool,
     pub axis_stroke: Stroke,
@@ -144,7 +144,7 @@ pub struct CartesianAxisTheme {
     pub labels_font_size: f64,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct LineTheme {
     pub stroke: Stroke,
     pub symbol_show: bool,
@@ -153,7 +153,7 @@ pub struct LineTheme {
     pub symbol_size: f64,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ScatterTheme {
     pub stroke: Stroke,
     pub stroke_color: Brush,

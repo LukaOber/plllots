@@ -1,6 +1,6 @@
 use bon::Builder;
 
-#[derive(Debug, Clone, Copy, Builder)]
+#[derive(Debug, Clone, Builder, PartialEq)]
 pub struct PlotSize {
     pub width: f64,
     pub height: f64,

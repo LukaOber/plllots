@@ -25,12 +25,7 @@ impl VelloRenderer {
         }
     }
 
-    pub fn render_to_scene(
-        &mut self,
-        chart: &Chart,
-        scene: &mut Scene,
-        mouse_position: Option<Point>,
-    ) {
+    pub fn render_to_scene(&mut self, chart: &Chart, scene: &mut Scene) {
         scene.fill(
             Fill::NonZero,
             Affine::IDENTITY,
@@ -43,6 +38,18 @@ impl VelloRenderer {
         for primitive in primitives {
             primitive.append_vello(scene, self);
         }
+    }
+
+    pub fn render_to_interactive(
+        &mut self,
+        chart: &Chart,
+        scene: &mut Scene,
+        mouse_position: Option<Point>,
+    ) {
+        let primitives = chart.generate_primitives();
+        for primitive in primitives {
+            primitive.append_vello(scene, self);
+        }
 
         if let Some(p) = mouse_position {
             let offsets = Offsets::from_margin(&chart.size, &chart.margins);
@@ -51,7 +58,7 @@ impl VelloRenderer {
                 && offsets.y_axis_start >= p.y
                 && p.y >= offsets.y_axis_end
             {
-                let dash_size = offsets.x_span / 85.0;
+                let dash_size = offsets.x_span / 45.0;
                 let brush = Brush::Solid(Color::from_rgba8(0xcc, 0xcc, 0xcc, 0xff));
 
                 let x_stroke = Stroke::new(1.0).with_dashes(0.0, [dash_size]);
@@ -60,8 +67,8 @@ impl VelloRenderer {
                     Point::new(offsets.x_axis_end, p.y),
                 );
 
-                let dash_size = offsets.y_span / 85.0;
                 let y_stroke = Stroke::new(1.0).with_dashes(0.0, [dash_size]);
+
                 let y_line = Line::new(
                     Point::new(p.x, offsets.y_axis_start),
                     Point::new(p.x, offsets.y_axis_end),
