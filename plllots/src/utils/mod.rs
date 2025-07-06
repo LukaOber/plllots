@@ -1,3 +1,5 @@
+use wide::f64x4;
+
 pub(crate) mod lttb;
 
 pub(crate) fn get_scale_details(min: f64, max: f64) -> (f64, f64, f64) {
@@ -27,79 +29,66 @@ pub(crate) fn get_scale_details(min: f64, max: f64) -> (f64, f64, f64) {
 }
 
 pub(crate) fn get_raw_range(data: &[f64]) -> (f64, f64) {
-    let minimum_value = data
-        .iter()
-        .min_by(|a, b| a.partial_cmp(b).unwrap())
-        .unwrap();
-    let maximum_value = data
-        .iter()
-        .max_by(|a, b| a.partial_cmp(b).unwrap())
-        .unwrap();
-    (*minimum_value, *maximum_value)
+    if data.is_empty() {
+        panic!("Cannot get range of empty slice");
+    }
+
+    let mut min_val = data[0];
+    let mut max_val = data[0];
+
+    if min_val.is_nan() {
+        for &val in data.iter() {
+            if !val.is_nan() {
+                min_val = val;
+                max_val = val;
+                break;
+            }
+        }
+    }
+
+    const LANES: usize = 4;
+    let chunks = data.chunks_exact(LANES);
+    let remainder = chunks.remainder();
+
+    let mut min_vec = f64x4::splat(min_val);
+    let mut max_vec = f64x4::splat(max_val);
+
+    for chunk in chunks {
+        let vec = f64x4::from([chunk[0], chunk[1], chunk[2], chunk[3]]);
+
+        let is_nan = vec.is_nan();
+
+        let new_min = vec.min(min_vec);
+        let new_max = vec.max(max_vec);
+
+        min_vec = is_nan.blend(min_vec, new_min);
+        max_vec = is_nan.blend(max_vec, new_max);
+    }
+
+    let min_array: [f64; 4] = min_vec.into();
+    let max_array: [f64; 4] = max_vec.into();
+
+    for i in 0..LANES {
+        if !min_array[i].is_nan() && min_array[i] < min_val {
+            min_val = min_array[i];
+        }
+        if !max_array[i].is_nan() && max_array[i] > max_val {
+            max_val = max_array[i];
+        }
+    }
+
+    for &value in remainder {
+        if !value.is_nan() {
+            if value < min_val {
+                min_val = value;
+            }
+            if value > max_val {
+                max_val = value;
+            }
+        }
+    }
+    (min_val, max_val)
 }
-
-// from https://github.com/jeromefroe/lttb-rs
-// pub fn lttb(data: Vec<Point>, threshold: usize) -> Vec<Point> {
-//     if threshold >= data.len() || threshold == 0 {
-//         // Nothing to do.
-
-//         return data;
-//     }
-//     let mut sampled = Vec::with_capacity(threshold);
-//     // Bucket size. Leave room for start and end data points.
-//     let every = ((data.len() - 2) as f64) / ((threshold - 2) as f64);
-//     // Initially a is the first point in the triangle.
-//     let mut a = 0;
-//     // Always add the first point.
-//     sampled.push(data[a]);
-
-//     for i in 0..threshold - 2 {
-//         // Calculate point average for next bucket (containing c).
-//         let mut avg_x = 0f64;
-//         let mut avg_y = 0f64;
-//         let avg_range_start = (((i + 1) as f64) * every) as usize + 1;
-//         let mut end = (((i + 2) as f64) * every) as usize + 1;
-//         if end >= data.len() {
-//             end = data.len();
-//         }
-//         let avg_range_end = end;
-//         let avg_range_length = (avg_range_end - avg_range_start) as f64;
-//         for i in 0..(avg_range_end - avg_range_start) {
-//             let idx = (avg_range_start + i) as usize;
-//             avg_x += data[idx].x;
-//             avg_y += data[idx].y;
-//         }
-//         avg_x /= avg_range_length;
-//         avg_y /= avg_range_length;
-//         // Get the range for this bucket.
-//         let range_offs = ((i as f64) * every) as usize + 1;
-//         let range_to = (((i + 1) as f64) * every) as usize + 1;
-//         // Point a.
-//         let point_a_x = data[a].x;
-//         let point_a_y = data[a].y;
-//         let mut max_area = -1f64;
-//         let mut next_a = range_offs;
-//         for i in 0..(range_to - range_offs) {
-//             let idx = (range_offs + i) as usize;
-//             // Calculate triangle area over three buckets.
-//             let area = ((point_a_x - avg_x) * (data[idx].y - point_a_y)
-//                 - (point_a_x - data[idx].x) * (avg_y - point_a_y))
-//                 .abs()
-//                 * 0.5;
-//             if area > max_area {
-//                 max_area = area;
-//                 next_a = idx; // Next a is this b.
-//             }
-//         }
-//         sampled.push(data[next_a]); // Pick this point from the bucket.
-
-//         a = next_a; // This a is the next a (chosen b).
-//     }
-//     // Always add the last point.
-//     sampled.push(data[data.len() - 1]);
-
-//     sampled
-// }
 
 #[cfg(test)]
 #[cfg(test)]
