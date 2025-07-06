@@ -488,6 +488,22 @@ impl<'a> CategoryAxis {
                 .unwrap_or(&((index / 2) as f64 * axis_auto_offset)),
         }
     }
+
+    pub(crate) fn pos_closure(
+        &self,
+        axis_type: &AxisType,
+        helper: &ChartHelper,
+    ) -> impl Fn(usize, f64) -> f64 {
+        let (axis_start, span) = match axis_type {
+            AxisType::XAxis => (helper.offsets.x_axis_start, helper.offsets.x_span),
+            AxisType::YAxis => (helper.offsets.y_axis_start, helper.offsets.y_span),
+        };
+        let spacing = span / self.data.len() as f64;
+        move |i: usize, _v: f64| match axis_type {
+            AxisType::XAxis => axis_start + (i as f64 + 0.5) * spacing,
+            AxisType::YAxis => axis_start - (i as f64 + 0.5) * spacing,
+        }
+    }
 }
 
 impl<'a> ValueAxis {
@@ -874,6 +890,25 @@ impl<'a> ValueAxis {
                 .axis_offset
                 .as_ref()
                 .unwrap_or(&((index / 2) as f64 * axis_auto_offset)),
+        }
+    }
+
+    pub(crate) fn pos_closure(
+        &self,
+        axis_type: &AxisType,
+        axis_meta: &ValueAxisMeta,
+        helper: &ChartHelper,
+    ) -> impl Fn(usize, f64) -> f64 {
+        let (axis_start, span) = match axis_type {
+            AxisType::XAxis => (helper.offsets.x_axis_start, helper.offsets.x_span),
+            AxisType::YAxis => (helper.offsets.y_axis_start, helper.offsets.y_span),
+        };
+        move |_i: usize, v: f64| {
+            let percentage_pos = (v - axis_meta.min) / (axis_meta.max - axis_meta.min);
+            match axis_type {
+                AxisType::XAxis => axis_start + (percentage_pos * span),
+                AxisType::YAxis => axis_start - (percentage_pos * span),
+            }
         }
     }
 }

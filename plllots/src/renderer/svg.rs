@@ -243,7 +243,7 @@ impl AppendSvg for crate::primitives::MultiCircle<'_> {
             Brush::Image(_image) => todo!(),
         };
 
-        for coord in &self.coords {
+        for coord in self.coords {
             doc.append(
                 Circle::new()
                     .set("r", self.radius)

@@ -855,7 +855,6 @@ version = "0.1.0"
 dependencies = [
  "bon",
  "kurbo",
- "num-traits",
  "parley",
  "peniko 0.4.0",
  "svg",
