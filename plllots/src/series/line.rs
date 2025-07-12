@@ -35,10 +35,10 @@ pub struct Line {
 
 #[derive(Debug, Builder, Clone, PartialEq)]
 pub struct LineData {
-    #[builder(setters(option_fn(vis = "")))]
-    pub primary_data_index: Option<usize>,
-    #[builder(setters(option_fn(vis = "")))]
-    pub secondary_data_index: Option<usize>,
+    #[builder(default = 0)]
+    pub primary_data_index: usize,
+    #[builder(default = 1)]
+    pub secondary_data_index: usize,
     #[builder(setters(option_fn(vis = "")))]
     pub lttb: Option<usize>,
     pub data: Vec<Vec<f64>>,
@@ -47,8 +47,8 @@ pub struct LineData {
 impl From<Vec<f64>> for LineData {
     fn from(value: Vec<f64>) -> Self {
         LineData {
-            primary_data_index: None,
-            secondary_data_index: None,
+            primary_data_index: 0,
+            secondary_data_index: 1,
             lttb: None,
             data: vec![value],
         }
@@ -58,8 +58,8 @@ impl From<Vec<f64>> for LineData {
 impl From<Vec<Vec<f64>>> for LineData {
     fn from(value: Vec<Vec<f64>>) -> Self {
         LineData {
-            primary_data_index: None,
-            secondary_data_index: None,
+            primary_data_index: 0,
+            secondary_data_index: 1,
             lttb: None,
             data: value,
         }
@@ -88,7 +88,7 @@ impl Line {
                 let y_pos =
                     y_axis.pos_closure(&crate::component::AxisType::YAxis, &y_helper, helper);
 
-                let primary_data_index = self.data.primary_data_index.unwrap_or(0);
+                let primary_data_index = self.data.primary_data_index;
                 self.draw(
                     primitives,
                     theme,
@@ -107,7 +107,7 @@ impl Line {
                     x_axis.pos_closure(&crate::component::AxisType::XAxis, &x_helper, helper);
                 let y_pos = y_axis.pos_closure(&crate::component::AxisType::YAxis, helper);
 
-                let primary_data_index = self.data.primary_data_index.unwrap_or(0);
+                let primary_data_index = self.data.primary_data_index;
                 self.draw(
                     primitives,
                     theme,
@@ -127,8 +127,8 @@ impl Line {
                 let y_pos =
                     y_axis.pos_closure(&crate::component::AxisType::YAxis, &y_helper, helper);
 
-                let primary_data_index = self.data.primary_data_index.unwrap_or(0);
-                let secondary_data_index = self.data.secondary_data_index.unwrap_or(1);
+                let primary_data_index = self.data.primary_data_index;
+                let secondary_data_index = self.data.secondary_data_index;
                 self.draw(
                     primitives,
                     theme,
@@ -147,8 +147,8 @@ impl Line {
         primitives: &mut Vec<Primitives<'a>>,
         theme: &'a Theme,
         series_index: usize,
-        x_pos: &impl Fn(usize, f64) -> f64,
-        y_pos: &impl Fn(usize, f64) -> f64,
+        x_pos: &impl Fn(Option<usize>, Option<f64>) -> f64,
+        y_pos: &impl Fn(Option<usize>, Option<f64>) -> f64,
         primary_data_index: usize,
         secondary_data_index: usize,
     ) {
@@ -175,8 +175,8 @@ impl Line {
                     .enumerate()
                 {
                     path.coords.push(Point::new(
-                        x_pos(index, *secondary_value),
-                        y_pos(index, *primary_value),
+                        x_pos(Some(index), Some(*secondary_value)),
+                        y_pos(Some(index), Some(*primary_value)),
                     ));
                 }
             }
@@ -189,8 +189,8 @@ impl Line {
                     .enumerate()
                 {
                     path.coords.push(Point::new(
-                        x_pos(index, *secondary_value),
-                        y_pos(index, *primary_value),
+                        x_pos(Some(index), Some(*secondary_value)),
+                        y_pos(Some(index), Some(*primary_value)),
                     ));
                 }
             }

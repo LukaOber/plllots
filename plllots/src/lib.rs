@@ -81,13 +81,13 @@ mod tests {
                                 // primary_data_index: Some(0),
                                 // secondary_data_index: Some(1),
                                 // symbol_size_index: Some(2),
-                                primary_data_index: None,
-                                secondary_data_index: None,
+                                primary_data_index: 0,
+                                secondary_data_index: 1,
                                 symbol_size_index: Some(2),
-                                data: vec![
-                                    vec![150.0, 230.0, 224.0, 218.0, 135.0, 147.0, 260.0],
-                                    vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0],
-                                    vec![11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0],
+                                plot_data: vec![
+                                    vec![150.0, 230.0, 224.0, 218.0, 135.0, 147.0, 260.0].into(),
+                                    vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0].into(),
+                                    vec![11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0].into(),
                                 ],
                             })
                             .build(),

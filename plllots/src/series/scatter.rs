@@ -8,6 +8,8 @@ use crate::{
     primitives::Primitives,
 };
 
+use super::data::PlotData;
+
 #[derive(Debug, Builder, Clone, PartialEq)]
 pub struct Scatter {
     #[builder(setters(option_fn(vis = "")))]
@@ -28,34 +30,45 @@ pub struct Scatter {
 
 #[derive(Debug, Builder, Clone, PartialEq)]
 pub struct ScatterData {
-    #[builder(setters(option_fn(vis = "")))]
-    pub primary_data_index: Option<usize>,
-    #[builder(setters(option_fn(vis = "")))]
-    pub secondary_data_index: Option<usize>,
+    #[builder(setters(vis = ""), default = 0)]
+    pub primary_data_index: usize,
+    #[builder(setters(vis = ""), default = 1)]
+    pub secondary_data_index: usize,
     #[builder(setters(option_fn(vis = "")))]
     pub symbol_size_index: Option<usize>,
-    pub data: Vec<Vec<f64>>,
+    #[builder(setters(vis = ""))]
+    pub plot_data: Vec<PlotData>,
 }
 
-impl From<Vec<f64>> for ScatterData {
-    fn from(value: Vec<f64>) -> Self {
-        ScatterData {
-            primary_data_index: None,
-            secondary_data_index: None,
-            symbol_size_index: None,
-            data: vec![value],
-        }
+impl<S: scatter_data_builder::State> ScatterDataBuilder<S> {
+    pub fn y_data_index(
+        self,
+        index: usize,
+    ) -> ScatterDataBuilder<scatter_data_builder::SetPrimaryDataIndex<S>>
+    where
+        S::PrimaryDataIndex: scatter_data_builder::IsUnset,
+    {
+        self.primary_data_index(index)
     }
-}
 
-impl From<Vec<Vec<f64>>> for ScatterData {
-    fn from(value: Vec<Vec<f64>>) -> Self {
-        ScatterData {
-            primary_data_index: None,
-            secondary_data_index: None,
-            symbol_size_index: None,
-            data: value,
-        }
+    pub fn radius_data_index(
+        self,
+        index: usize,
+    ) -> ScatterDataBuilder<scatter_data_builder::SetPrimaryDataIndex<S>>
+    where
+        S::PrimaryDataIndex: scatter_data_builder::IsUnset,
+    {
+        self.primary_data_index(index)
+    }
+
+    pub fn data<D: Into<PlotData>>(
+        self,
+        data: Vec<D>,
+    ) -> ScatterDataBuilder<scatter_data_builder::SetPlotData<S>>
+    where
+        S::PlotData: scatter_data_builder::IsUnset,
+    {
+        self.plot_data(data.into_iter().map(|d| d.into()).collect())
     }
 }
 
@@ -81,7 +94,7 @@ impl Scatter {
                 let y_pos =
                     y_axis.pos_closure(&crate::component::AxisType::YAxis, &y_helper, helper);
 
-                let primary_data_index = self.data.primary_data_index.unwrap_or(0);
+                let primary_data_index = self.data.primary_data_index;
                 self.draw(
                     primitives,
                     theme,
@@ -100,7 +113,7 @@ impl Scatter {
                     x_axis.pos_closure(&crate::component::AxisType::XAxis, &x_helper, helper);
                 let y_pos = y_axis.pos_closure(&crate::component::AxisType::YAxis, helper);
 
-                let primary_data_index = self.data.primary_data_index.unwrap_or(0);
+                let primary_data_index = self.data.primary_data_index;
                 self.draw(
                     primitives,
                     theme,
@@ -119,8 +132,8 @@ impl Scatter {
                     x_axis.pos_closure(&crate::component::AxisType::XAxis, &x_helper, helper);
                 let y_pos =
                     y_axis.pos_closure(&crate::component::AxisType::YAxis, &y_helper, helper);
-                let primary_data_index = self.data.primary_data_index.unwrap_or(0);
-                let secondary_data_index = self.data.secondary_data_index.unwrap_or(1);
+                let primary_data_index = self.data.primary_data_index;
+                let secondary_data_index = self.data.secondary_data_index;
                 self.draw(
                     primitives,
                     theme,
@@ -139,20 +152,22 @@ impl Scatter {
         primitives: &mut Vec<Primitives<'a>>,
         theme: &'a Theme,
         series_index: usize,
-        x_pos: &impl Fn(usize, f64) -> f64,
-        y_pos: &impl Fn(usize, f64) -> f64,
+        x_pos: &impl Fn(Option<usize>, Option<f64>) -> f64,
+        y_pos: &impl Fn(Option<usize>, Option<f64>) -> f64,
         primary_data_index: usize,
         secondary_data_index: usize,
     ) {
-        let allocation_size = self.data.data[primary_data_index].len();
-        primitives.reserve(allocation_size);
-        for (index, (primary_value, secondary_value)) in self.data.data[primary_data_index]
+        // TODO readd later
+        // let allocation_size = self.data.plot_data[primary_data_index].len();
+        // primitives.reserve(allocation_size);
+
+        for (index, (primary_value, secondary_value)) in self.data.plot_data[primary_data_index]
             .iter()
-            .zip(self.data.data[secondary_data_index].iter())
+            .zip(self.data.plot_data[secondary_data_index].iter())
             .enumerate()
         {
             let radius = match self.data.symbol_size_index {
-                Some(i) => self.data.data[i][index],
+                Some(i) => self.data.plot_data[i][index],
                 None => self.symbol_size.unwrap_or(theme.scatter.symbol_size),
             };
             primitives.push(crate::primitives::Primitives::Circle(

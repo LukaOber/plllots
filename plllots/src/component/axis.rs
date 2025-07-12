@@ -8,7 +8,7 @@ use peniko::Brush;
 use crate::{
     chart::{ChartHelper, Theme},
     primitives::Primitives,
-    series::Series,
+    series::{Series, data::PlotData},
     utils::{get_raw_range, get_scale_details},
 };
 
@@ -493,15 +493,15 @@ impl<'a> CategoryAxis {
         &self,
         axis_type: &AxisType,
         helper: &ChartHelper,
-    ) -> impl Fn(usize, f64) -> f64 {
+    ) -> impl Fn(Option<usize>, Option<f64>) -> f64 {
         let (axis_start, span) = match axis_type {
             AxisType::XAxis => (helper.offsets.x_axis_start, helper.offsets.x_span),
             AxisType::YAxis => (helper.offsets.y_axis_start, helper.offsets.y_span),
         };
         let spacing = span / self.data.len() as f64;
-        move |i: usize, _v: f64| match axis_type {
-            AxisType::XAxis => axis_start + (i as f64 + 0.5) * spacing,
-            AxisType::YAxis => axis_start - (i as f64 + 0.5) * spacing,
+        move |i: Option<usize>, _v: Option<f64>| match axis_type {
+            AxisType::XAxis => axis_start + (i.unwrap() as f64 + 0.5) * spacing,
+            AxisType::YAxis => axis_start - (i.unwrap() as f64 + 0.5) * spacing,
         }
     }
 }
@@ -521,17 +521,21 @@ impl<'a> ValueAxis {
             Some(s) => match s {
                 Series::Line(line) => {
                     let data_index = match primary {
-                        true => line.data.primary_data_index.unwrap_or(0),
-                        false => line.data.secondary_data_index.unwrap_or(1),
+                        true => line.data.primary_data_index,
+                        false => line.data.secondary_data_index,
                     };
                     get_raw_range(&line.data.data[data_index])
                 }
                 Series::Scatter(scatter) => {
                     let data_index = match primary {
-                        true => scatter.data.primary_data_index.unwrap_or(0),
-                        false => scatter.data.secondary_data_index.unwrap_or(1),
+                        true => scatter.data.primary_data_index,
+                        false => scatter.data.secondary_data_index,
                     };
-                    get_raw_range(&scatter.data.data[data_index])
+                    if let PlotData::Float(data) = &scatter.data.plot_data[data_index] {
+                        get_raw_range(data)
+                    } else {
+                        todo!("error msg")
+                    }
                 }
             },
             None => unreachable!(),
@@ -541,18 +545,22 @@ impl<'a> ValueAxis {
             let (s_min, s_max) = match series {
                 Series::Line(line) => {
                     let data_index = match primary {
-                        true => line.data.primary_data_index.unwrap_or(0),
-                        false => line.data.secondary_data_index.unwrap_or(1),
+                        true => line.data.primary_data_index,
+                        false => line.data.secondary_data_index,
                     };
                     get_raw_range(&line.data.data[data_index])
                 }
 
                 Series::Scatter(scatter) => {
                     let data_index = match primary {
-                        true => scatter.data.primary_data_index.unwrap_or(0),
-                        false => scatter.data.secondary_data_index.unwrap_or(1),
+                        true => scatter.data.primary_data_index,
+                        false => scatter.data.secondary_data_index,
                     };
-                    get_raw_range(&scatter.data.data[data_index])
+                    if let PlotData::Float(data) = &scatter.data.plot_data[data_index] {
+                        get_raw_range(data)
+                    } else {
+                        todo!("error msg")
+                    }
                 }
             };
             min = min.min(s_min);
@@ -898,13 +906,13 @@ impl<'a> ValueAxis {
         axis_type: &AxisType,
         axis_meta: &ValueAxisMeta,
         helper: &ChartHelper,
-    ) -> impl Fn(usize, f64) -> f64 {
+    ) -> impl Fn(Option<usize>, Option<f64>) -> f64 {
         let (axis_start, span) = match axis_type {
             AxisType::XAxis => (helper.offsets.x_axis_start, helper.offsets.x_span),
             AxisType::YAxis => (helper.offsets.y_axis_start, helper.offsets.y_span),
         };
-        move |_i: usize, v: f64| {
-            let percentage_pos = (v - axis_meta.min) / (axis_meta.max - axis_meta.min);
+        move |_i: Option<usize>, v: Option<f64>| {
+            let percentage_pos = (v.unwrap() - axis_meta.min) / (axis_meta.max - axis_meta.min);
             match axis_type {
                 AxisType::XAxis => axis_start + (percentage_pos * span),
                 AxisType::YAxis => axis_start - (percentage_pos * span),
